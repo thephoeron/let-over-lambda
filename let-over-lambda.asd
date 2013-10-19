@@ -16,8 +16,9 @@
   :serial t
   :description "The Production version code from letoverlambda.com, conveniently wrapped in an ASDF System for Quicklisp."
   :version #.*lol-version*
-  :author "Doug Hoyte"
-  :license "Attribution"
+  :author "Doug Hoyte <doug@hoytech.com>"
+  :maintainer "\"the Phoeron\" <sysop@thephoeron.com>"
+  :license "BSD Simplified"
   :depends-on (#:cl-ppcre)
   :components ((:file "package")
                (:file "let-over-lambda")))
