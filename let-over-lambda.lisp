@@ -75,15 +75,6 @@
           (subseq (symbol-name s) 2))))
 
 
-
-; (defun g!-symbol-p (s)
-;   (and (symbolp s)
-;        (> (length (symbol-name s)) 2)
-;        (string= (symbol-name s)
-;                 "G!"
-;                 :start1 0
-;                 :end1 2)))
-
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
                 (remove-if-not #'g!-symbol-p
@@ -96,21 +87,6 @@
                                  2))))
                syms)
          ,@body))))
-
-
-
-; (defun o!-symbol-p (s)
-;   (and (symbolp s)
-;        (> (length (symbol-name s)) 2)
-;        (string= (symbol-name s)
-;                 "O!"
-;                 :start1 0
-;                 :end1 2)))
-
-(defun o!-symbol-to-g!-symbol (s)
-  (symb "G!"
-        (subseq (symbol-name s) 2)))
-
 
 
 (defmacro defmacro! (name args &rest body)
