@@ -53,7 +53,6 @@
                              (rec (cdr x) acc))))))
       (rec x nil)))
 
-
   (defun g!-symbol-p (s)
     (and (symbolp s)
          (> (length (symbol-name s)) 2)
@@ -74,7 +73,6 @@
     (symb "G!"
           (subseq (symbol-name s) 2))))
 
-
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
                 (remove-if-not #'g!-symbol-p
@@ -88,7 +86,6 @@
                syms)
          ,@body))))
 
-
 (defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p args))
          (gs (mapcar #'o!-symbol-to-g!-symbol os)))
@@ -96,11 +93,7 @@
        `(let ,(mapcar #'list (list ,@gs) (list ,@os))
           ,(progn ,@body)))))
 
-
-
-
 ;; Nestable suggestion from Daniel Herring
-
 (defun |#"-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
   (let (chars (state 'normal) (depth 1))
@@ -141,12 +134,7 @@
 (set-dispatch-macro-character
   #\# #\" #'|#"-reader|)
 
-
-
-
-
 ; This version is from Martin Dirichs
-
 (defun |#>-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
   (let (chars)
@@ -172,7 +160,6 @@
           (nreverse
             (nthcdr (length pattern) output))
           'string)))))
-
 
 (set-dispatch-macro-character
   #\# #\> #'|#>-reader|)
@@ -264,8 +251,6 @@
 
     (set-dispatch-macro-character
       #\# #\` #'|#`-reader|))
-
-
 
 (defmacro alet% (letargs &rest body)
   `(let ((this) ,@letargs)
@@ -373,9 +358,7 @@
               ,',vars pandoric-eval-tunnel
               ,,expr))))
 
-
 ;; Chapter 7
-
 (eval-when (:compile-toplevel :execute :load-toplevel)
     (set-dispatch-macro-character #\# #\f
        (lambda (stream sub-char numarg)
@@ -478,9 +461,7 @@
                        #2# ,g!a)))
            (build-batcher-sn (length places))))))
 
-
 ;;;;;; NEW CODE FOR ANTIWEB
-
 #+cl-ppcre
 (defun dollar-symbol-p (s)
   (and (symbolp s)

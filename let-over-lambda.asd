@@ -3,12 +3,12 @@
 (in-package :cl-user)
 
 (defpackage let-over-lambda-asd
-	(:use :cl :asdf))
+  (:use :cl :asdf))
 
 (in-package :let-over-lambda-asd)
 
 (defvar *lol-version* "1.0"
-	"A string denoting the current version of LET-OVER-LAMBDA.  Used for diagnostic output.")
+  "A string denoting the current version of LET-OVER-LAMBDA.  Used for diagnostic output.")
 
 (export '*lol-version*)
 
