@@ -17,7 +17,7 @@
   :description "The Production version code from letoverlambda.com, conveniently wrapped in an ASDF System for Quicklisp."
   :version #.*lol-version*
   :author "Doug Hoyte <doug@hoytech.com>"
-  :maintainer "\"the Phoeron\" <sysop@thephoeron.com>"
+  :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
   :license "BSD Simplified"
   :depends-on (#:cl-ppcre)
   :components ((:file "package")
