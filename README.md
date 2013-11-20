@@ -12,9 +12,17 @@ Tested with SBCL 1.1.7+ on Linux and OS X.
 Usage
 -----
 
+Clone into `~/quicklisp/local-projects/`
+
     * (ql:quickload "let-over-lambda")
     
     * (lol:flatten '((A . B) (C . D) (E . (F G H (I . J) . K))))
     
     (A B C D E F G H I J K)
 
+UPDATE 11/19/2013
+-----------------
+
+Added request for inclusion in `quicklisp-projects`.
+
+See https://github.com/quicklisp/quicklisp-projects/issues/598 for status updates, etc
