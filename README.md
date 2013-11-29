@@ -26,3 +26,8 @@ UPDATE 11/19/2013
 Added request for inclusion in `quicklisp-projects`.
 
 See https://github.com/quicklisp/quicklisp-projects/issues/598 for status updates, etc
+
+UPDATE 11/29/2013
+-----------------
+
+Added to [quicklisp-projects](https://github.com/quicklisp/quicklisp-projects) on 11/25/2013, will be included in next Quicklisp release
