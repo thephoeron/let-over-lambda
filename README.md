@@ -12,7 +12,7 @@ Tested with SBCL 1.1.7+ on Linux and OS X.
 Usage
 -----
 
-Clone into `~/quicklisp/local-projects/`
+Make sure you have the latest Quicklisp distribution, then include it as a dependency in your system definition, or from the REPL evaluate `(ql:quickload "let-over-lambda")`.
 
     * (ql:quickload "let-over-lambda")
     
@@ -20,14 +20,7 @@ Clone into `~/quicklisp/local-projects/`
     
     (A B C D E F G H I J K)
 
-UPDATE 11/19/2013
+UPDATE 12/18/2013
 -----------------
 
-Added request for inclusion in `quicklisp-projects`.
-
-See https://github.com/quicklisp/quicklisp-projects/issues/598 for status updates, etc
-
-UPDATE 11/29/2013
------------------
-
-Added to [quicklisp-projects](https://github.com/quicklisp/quicklisp-projects) on 11/25/2013, will be included in next Quicklisp release
+Now available in the December 2013 distribution of Quicklisp
