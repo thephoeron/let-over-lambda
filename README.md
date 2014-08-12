@@ -9,6 +9,8 @@ Includes minor modifications by Jorge Gajon <gajon@gajon.org>.
 
 Tested with SBCL 1.1.7+ on Linux and OS X.
 
+NOTE: Due to incompatible change to backquote syntax in SBCL 1.2.2, `DEFMACRO!` and related macros have been "temporarily" disabled in SBCL &gt;= v1.2.2 until an optimal solution can be found.
+
 Usage
 -----
 
