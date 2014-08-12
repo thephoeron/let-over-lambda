@@ -48,6 +48,7 @@
     (labels ((rec (x acc)
                   (cond ((null x) acc)
                         ((atom x) (cons x acc))
+                        #+sbcl ((typep x 'sb-impl::comma) (cons (sb-impl::comma-expr x) acc))
                         (t (rec
                              (car x)
                              (rec (cdr x) acc))))))
@@ -75,15 +76,15 @@
 
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
-                (remove-if-not #'g!-symbol-p
-                               (flatten body)))))
+               (remove-if-not #'g!-symbol-p
+                              (flatten body)))))
     `(defmacro ,name ,args
        (let ,(mapcar
-               (lambda (s)
-                 `(,s (gensym ,(subseq
-                                 (symbol-name s)
-                                 2))))
-               syms)
+              (lambda (s)
+                `(,s (gensym ,(subseq
+                               (symbol-name s)
+                               2))))
+              syms)
          ,@body))))
 
 (defmacro defmacro! (name args &rest body)
