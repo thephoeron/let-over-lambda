@@ -460,6 +460,7 @@
       (setf p (ash p -1)))
     (nreverse network)))
 
+#+safe-sbcl
 (defmacro! sortf (comparator &rest places)
   (if places
     `(tagbody
@@ -493,7 +494,7 @@
 
 ;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
 ;; sub-lexical scope even though this isn't an invocation of the macro.
-#+cl-ppcre
+#+(and cl-ppcre safe-sbcl)
 (defmacro! if-match ((test str) conseq &optional altern)
   (let ((dollars (remove-duplicates
                    (remove-if-not #'dollar-symbol-p
@@ -511,6 +512,7 @@
                  ,conseq))
               ,altern))))))
 
+#+safe-sbcl
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
