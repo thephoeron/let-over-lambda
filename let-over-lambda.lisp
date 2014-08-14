@@ -464,7 +464,11 @@
       (setf p (ash p -1)))
     (nreverse network)))
 
+<<<<<<< HEAD
 ;; #+safe-sbcl
+=======
+#+safe-sbcl
+>>>>>>> 8a365d489a0c3f498bf4c20cccc236036911591a
 (defmacro! sortf (comparator &rest places)
   (if places
     `(tagbody
@@ -498,8 +502,12 @@
 
 ;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
 ;; sub-lexical scope even though this isn't an invocation of the macro.
+<<<<<<< HEAD
 ;; #+(and cl-ppcre safe-sbcl)
 #+cl-ppcre
+=======
+#+(and cl-ppcre safe-sbcl)
+>>>>>>> 8a365d489a0c3f498bf4c20cccc236036911591a
 (defmacro! if-match ((test str) conseq &optional altern)
   (let ((dollars (remove-duplicates
                    (remove-if-not #'dollar-symbol-p
@@ -517,7 +525,11 @@
                  ,conseq))
               ,altern))))))
 
+<<<<<<< HEAD
 ;; #+safe-sbcl
+=======
+#+safe-sbcl
+>>>>>>> 8a365d489a0c3f498bf4c20cccc236036911591a
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
