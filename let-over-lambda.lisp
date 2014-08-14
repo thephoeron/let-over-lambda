@@ -53,8 +53,8 @@
   (defun flatten (x)
     (labels ((rec (x acc)
                   (cond ((null x) acc)
+                        #-safe-sbcl ((typep x 'sb-impl::comma) (rec (sb-impl::comma-expr x) acc))
                         ((atom x) (cons x acc))
-                        #+sbcl ((typep x 'sb-impl::comma) (cons (sb-impl::comma-expr x) acc))
                         (t (rec
                              (car x)
                              (rec (cdr x) acc))))))
@@ -80,7 +80,7 @@
     (symb "G!"
           (subseq (symbol-name s) 2))))
 
-#+safe-sbcl
+;; #+safe-sbcl
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
                (remove-if-not #'g!-symbol-p
@@ -94,7 +94,7 @@
               syms)
          ,@body))))
 
-#+safe-sbcl
+;; #+safe-sbcl
 (defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p args))
          (gs (mapcar #'o!-symbol-to-g!-symbol os)))
@@ -183,7 +183,8 @@
       (cons (coerce (nreverse chars) 'string)
             (segment-reader stream ch (- n 1))))))
 
-#+(and cl-ppcre safe-sbcl)
+;; #+(and cl-ppcre safe-sbcl)
+#+cl-ppcre
 (defmacro! match-mode-ppcre-lambda-form (o!args o!mods)
  ``(lambda (,',g!str)
      (cl-ppcre:scan
@@ -192,7 +193,8 @@
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
        ,',g!str)))
 
-#+(and cl-ppcre safe-sbcl)
+;; #+(and cl-ppcre safe-sbcl)
+#+cl-ppcre
 (defmacro! subst-mode-ppcre-lambda-form (o!args)
  ``(lambda (,',g!str)
      (cl-ppcre:regex-replace-all
@@ -200,7 +202,8 @@
        ,',g!str
        ,(cadr ,g!args))))
 
-#+(and cl-ppcre safe-sbcl)
+;; #+(and cl-ppcre safe-sbcl)
+#+cl-ppcre
 (defun |#~-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
   (let ((mode-char (read-char stream)))
@@ -222,10 +225,11 @@
                            2)))
       (t (error "Unknown #~~ mode character")))))
 
-#+(and cl-ppcre safe-sbcl)
+;; #+(and cl-ppcre safe-sbcl)
+#+cl-ppcre
 (set-dispatch-macro-character #\# #\~ #'|#~-reader|)
 
-#+safe-sbcl
+;; #+safe-sbcl
 (defmacro! dlambda (&rest ds)
   `(lambda (&rest ,g!args)
      (case (car ,g!args)
@@ -460,6 +464,7 @@
       (setf p (ash p -1)))
     (nreverse network)))
 
+;; #+safe-sbcl
 (defmacro! sortf (comparator &rest places)
   (if places
     `(tagbody
@@ -493,6 +498,7 @@
 
 ;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
 ;; sub-lexical scope even though this isn't an invocation of the macro.
+;; #+(and cl-ppcre safe-sbcl)
 #+cl-ppcre
 (defmacro! if-match ((test str) conseq &optional altern)
   (let ((dollars (remove-duplicates
@@ -511,6 +517,7 @@
                  ,conseq))
               ,altern))))))
 
+;; #+safe-sbcl
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
