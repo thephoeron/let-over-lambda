@@ -1,5 +1,4 @@
-let-over-lambda
-===============
+# let-over-lambda
 
 Doug Hoyte's "Production" version of macros from Let Over Lambda, ready for ASDF and Quicklisp.
 
@@ -7,22 +6,22 @@ Read more about the book and code at: http://letoverlambda.com
 
 Includes minor modifications by Jorge Gajon <gajon@gajon.org>.
 
-Tested with SBCL 1.1.7+ on Linux and OS X.
+### UPDATE 8/14/2014
 
-NOTE: Due to incompatible change to backquote syntax in SBCL 1.2.2, `DEFMACRO!` and related macros have been "temporarily" disabled in SBCL &gt;= v1.2.2 until an optimal solution can be found.
+Issue with incompatible change to backquote syntax in SBCL 1.2.2 resolved; tested against and builds on SBCL 1.2.0-1 and 1.2.2.  Will be available in the August release of Quicklisp.
 
-Usage
------
+### UPDATE 12/18/2013
+
+Now available in the December 2013 distribution of Quicklisp
+
+### Usage
 
 Make sure you have the latest Quicklisp distribution, then include it as a dependency in your system definition, or from the REPL evaluate `(ql:quickload "let-over-lambda")`.
 
-    * (ql:quickload "let-over-lambda")
-    
-    * (lol:flatten '((A . B) (C . D) (E . (F G H (I . J) . K))))
-    
-    (A B C D E F G H I J K)
+```lisp
+* (ql:quickload "let-over-lambda")
 
-UPDATE 12/18/2013
------------------
+* (lol:flatten '((A . B) (C . D) (E . (F G H (I . J) . K))))
 
-Now available in the December 2013 distribution of Quicklisp
+(A B C D E F G H I J K)
+```
