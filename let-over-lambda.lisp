@@ -53,7 +53,8 @@
   (defun flatten (x)
     (labels ((rec (x acc)
                   (cond ((null x) acc)
-                        #-safe-sbcl ((typep x 'sb-impl::comma) (rec (sb-impl::comma-expr x) acc))
+                        #+(and sbcl (not safe-sbcl))
+                        ((typep x 'sb-impl::comma) (rec (sb-impl::comma-expr x) acc))
                         ((atom x) (cons x acc))
                         (t (rec
                              (car x)
