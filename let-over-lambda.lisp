@@ -34,9 +34,9 @@
   (handler-case
       (progn
         (sb-ext:assert-version->= 1 2 2)
-        (setq *features* (remove :safe-sbcl *features*)))
+        (setq *features* (remove 'old-sbcl *features*)))
     (error ()
-      (pushnew :safe-sbcl *features*))))
+      (pushnew 'old-sbcl *features*))))
 
 (defun group (source n)
   (if (zerop n) (error "zero length"))
@@ -61,7 +61,7 @@
   (defun flatten (x)
     (labels ((rec (x acc)
                   (cond ((null x) acc)
-                        #+(and sbcl (not safe-sbcl))
+                        #+(and sbcl (not lol::old-sbcl))
                         ((typep x 'sb-impl::comma) (rec (sb-impl::comma-expr x) acc))
                         ((atom x) (cons x acc))
                         (t (rec
