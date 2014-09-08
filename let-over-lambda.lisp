@@ -24,6 +24,10 @@
 ;; code useful, or would like documentation,
 ;; please consider buying the book!
 
+;; Modifications by "the Phoeron" Colin J.E. Lupton, 2012--2014
+;; - Support for ASDF/Quicklisp
+;; - Cheap hacks to support new Backquote implementation in SBCL v1.2.2
+
 ;; Safety feature for SBCL>=v1.2.2
 #+sbcl
 (if (string-lessp (lisp-implementation-version) "1.2.2")
