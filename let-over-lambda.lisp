@@ -31,9 +31,12 @@
 ;; Safety feature for SBCL>=v1.2.2
 #+sbcl
 (eval-when (:compile-toplevel :execute)
-  (if (string-lessp (lisp-implementation-version) "1.2.2")
-      (pushnew :safe-sbcl *features*)
-      (setq *features* (remove :safe-sbcl *features*))))
+  (handler-case
+      (progn
+        (sb-ext:assert-version->= 1 2 2)
+        (setq *features* (remove :safe-sbcl *features*)))
+    (error ()
+      (pushnew :safe-sbcl *features*))))
 
 (defun group (source n)
   (if (zerop n) (error "zero length"))
