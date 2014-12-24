@@ -3,7 +3,11 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
-  (:export #:mkstr
+  (:import-from #:cl-syntax
+                #:defsyntax
+                #:use-syntax)
+  (:export #:lol-syntax
+           #:mkstr
            #:symb
            #:group
            #:flatten
