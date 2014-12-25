@@ -3,9 +3,9 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
-  (:import-from #:cl-syntax
-                #:defsyntax
-                #:use-syntax)
+  (:import-from #:named-readtables
+                #:defreadtable
+                #:in-readtable)
   (:export #:lol-syntax
            #:mkstr
            #:symb

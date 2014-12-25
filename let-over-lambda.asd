@@ -20,7 +20,7 @@
   :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
   :license "BSD Simplified"
   :depends-on (#:cl-ppcre
-               #:cl-syntax)
+               #:named-readtables)
   :components ((:file "package")
                (:file "let-over-lambda")))
 

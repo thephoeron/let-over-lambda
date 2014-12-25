@@ -273,7 +273,7 @@
     `(declare (optimize (speed ,numarg)
                         (safety ,(- 3 numarg)))))
 
-  (defsyntax lol-syntax
+  (defreadtable lol-syntax
     (:merge :standard)
     (:dispatch-macro-char #\# #\" #'|#"-reader|)
     (:dispatch-macro-char #\# #\> #'|#>-reader|)
@@ -283,7 +283,7 @@
     (:dispatch-macro-char #\# #\` #'|#`-reader|)
     (:dispatch-macro-char #\# #\f #'|#f-reader|)))
 
-(use-syntax lol-syntax)
+(in-readtable lol-syntax)
 
 (defmacro alet% (letargs &rest body)
   `(let ((this) ,@letargs)
