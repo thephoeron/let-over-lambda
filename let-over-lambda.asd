@@ -23,7 +23,8 @@
                #:named-readtables
                #:on-lisp
                #:defmacro-enhance
-               #:cl-reexport)
+               #:cl-reexport
+               #:cl-heredoc)
   :components ((:file "readtable")
                (:file "package")
                (:file "let-over-lambda")))

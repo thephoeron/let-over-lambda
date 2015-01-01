@@ -120,6 +120,7 @@
 (defreadtable lol-syntax
   (:merge :standard)
   (:dispatch-macro-char #\# #\" #'|#"-reader|)
+  (:dispatch-macro-char #\# #\> #'cl-heredoc:read-heredoc)
   (:dispatch-macro-char #\# #\~ #'|#~-reader|)
   (:dispatch-macro-char #\# #\` #'|#`-reader|)
   (:dispatch-macro-char #\# #\` #'|#`-reader|)
