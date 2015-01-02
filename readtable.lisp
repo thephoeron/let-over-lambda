@@ -80,12 +80,12 @@
        ,',g!-str
        ,(cadr ,o!-args))))
 
-(defparameter *matching-delimiters*
+(defparameter matching-delimiters
   '((#\( . #\)) (#\[ . #\]) (#\{ . #\}) (#\< . #\>)))
 
 (defun get-pair (char)
-  (or (car (rassoc char *matching-delimiters*))
-      (cdr (assoc char *matching-delimiters*))
+  (or (car (rassoc char matching-delimiters))
+      (cdr (assoc char matching-delimiters))
       char))
 
 (defun |#~-reader| (stream sub-char numarg)
