@@ -256,91 +256,24 @@
                 :end1 1)
        (parse-integer (subseq (symbol-name s) 1) :junk-allowed t)))
 
-(defun prune-if-match-bodies-from-sub-lexical-scope (tree)
-  (if (consp tree)
-      (if (or (eq (car tree) 'if-match)
-              (eq (car tree) 'when-match))
-          (cddr tree)
-          (cons (prune-if-match-bodies-from-sub-lexical-scope (car tree))
-                (prune-if-match-bodies-from-sub-lexical-scope (cdr tree))))
-      tree))
-
 (defmacro! if-match ((test o!-str) conseq &optional altern)
   (let ((dollars (remove-duplicates
                   (remove-if-not #'dollar-symbol-p (flatten conseq)))))
     (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
                    0)))
-      `(multiple-value-bind (,g!-s ,g!-e ,g!-ms ,g!-me) (,test ,o!-str)
-         (declare (ignorable ,g!-e ,g!-me))
-         (if ,g!-s
-             (if (< (length ,g!-ms) ,top)
-                 (progn
-                   (print ,g!-ms)
-                   (print ,top)
-                   (error "ifmatch: too few matches"))
-                 (let ,(mapcar #`(,(symb "$" a1) (subseq ,o!-str
-                                                         (aref ,g!-ms ,(1- a1))
-                                                         (aref ,g!-me ,(1- a1))))
-                               (loop for i from 1 to top collect i))
-                   ,conseq))
-             ,altern)))))
-
-(defmacro! if-match ((test o!-str) conseq &optional altern)
-  (let ((dollars (remove-duplicates
-                  (remove-if-not #'dollar-symbol-p (flatten conseq)))))
-    (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
-                   0)))
-      `(let ((,g!-matches (,test ,o!-str)))
-         (declare (ignorable , g!-matches))
-         (if ,g!-matches
-             (if (< (length ,g!-matches) ,top)
+      `(multiple-value-bind (,g!-match ,g!-matched-registers) (,test ,o!-str)
+         (declare (ignorable , g!-match))
+         (if ,g!-match
+             (if (< (length ,g!-matched-registers) ,top)
                  (error "ifmatch: too few matches")
-                 (let ,(mapcar #`(,( symb "$" a1) (nth ,(1- a1)
-                                                       ,g!-matches))
+                 (let ,(mapcar #`(,( symb "$" a1) (aref ,g!-matched-registers
+                                                        ,(1- a1)))
                                (loop for i from 1 to top collect i))
                    ,conseq))
              ,altern)))))
-
-(if-match (#~m/(a)bc/ "abc")
-          (progn
-            (ut::p "um" $1)
-            (if-match (#~m/abc/ "abc")
-                      (ut::p "dois" $1)
-                      'foi))
-          'foi)
-
 
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
-
-(defmacro! ifmatch ((test str) then &optional else)
-  "Checks for the existence of group-capturing regex (in /for(bar)baz/, bar is capured) in the TEST and bind $1, $2, $n vars to the captured regex. Obviously, doesn't work with runtime regexes"
-  (let* ((regexp (second (third test)))
-         (how-many-$-vars (when (stringp regexp)
-                            (let ((regex-paretheses
-                                   (ppcre:all-matches-as-strings "\\((.*?)\\)"
-                                                                 regexp)))
-                              (print regex-paretheses)
-                              (length regex-paretheses))))
-         ($-vars-let-form
-          (append `((|$`| (first ,g!-match-list))
-                    ($&   (second ,g!-match-list))
-                    (|$'| (third ,g!-match-list)))
-                  (when how-many-$-vars
-                    (mapcar (lambda (var-num)
-                              `(,(symbolicate "$"
-                                              (write-to-string var-num))
-                                 (aref ,g!-arr ,(1- var-num))))
-                            (loop for i from 1 to how-many-$-vars collect i))))))
-    `(multiple-value-bind (,g!-matches ,g!-arr) (,test ,str)
-       (if (plusp (length ,g!-matches))
-           (let* ((,g!-match-list (ppcre:split (format nil "(~a)" ,g!-matches)
-                                               ,str :with-registers-p t :limit 3))
-                  ,@$-vars-let-form)
-
-             (declare (ignorable ,@(mapcar #'car $-vars-let-form)))
-             ,then)
-           ,else))))
 
 ;; EOF
