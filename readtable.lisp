@@ -80,6 +80,14 @@
        ,',g!-str
        ,(cadr ,o!-args))))
 
+(defparameter *matching-delimiters*
+  '((#\( . #\)) (#\[ . #\]) (#\{ . #\}) (#\< . #\>)))
+
+(defun get-pair (char)
+  (or (car (rassoc char *matching-delimiters*))
+      (cdr (assoc char *matching-delimiters*))
+      char))
+
 (defun |#~-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
   (let ((mode-char (read-char stream)))
@@ -87,7 +95,7 @@
       ((char= mode-char #\m)
        (match-mode-ppcre-lambda-form
         (segment-reader stream
-                        (read-char stream)
+                        (get-pair (read-char stream))
                         1)
         (coerce (loop for c = (read-char stream)
                    while (alpha-char-p c)
