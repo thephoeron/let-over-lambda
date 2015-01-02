@@ -272,8 +272,6 @@
                    ,conseq))
              ,altern)))))
 
-(defmacro when-match ((test str) conseq &rest more-conseq)
+(defmacro when-match ((test str) &body forms)
   `(if-match (,test ,str)
-     (progn ,conseq ,@more-conseq)))
-
-;; EOF
+     (progn ,@forms)))
