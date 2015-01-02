@@ -45,12 +45,6 @@
                          `(cdr ,g!-args)))))
            ds))))
 
-(defmacro alet% (letargs &rest body)
-  `(let ((this) ,@letargs)
-     (setq this ,@(last body))
-     ,@(butlast body)
-     this))
-
 (defmacro alet (letargs &rest body)
   `(let ((this) ,@letargs)
      (setq this ,@(last body))
@@ -151,9 +145,6 @@
               ,',vars pandoric-eval-tunnel
               ,,expr))))
 
-;; Chapter 7
-
-
 (defmacro fast-progn (&rest body)
   `(locally #f ,@body))
 
@@ -246,7 +237,6 @@
                        #2# ,g!-a)))
            (build-batcher-sn (length places))))))
 
-;;;;;; NEW CODE FOR ANTIWEB
 (defun dollar-symbol-p (s)
   (and (symbolp s)
        (> (length (symbol-name s)) 1)
