@@ -265,41 +265,54 @@
                 (prune-if-match-bodies-from-sub-lexical-scope (cdr tree))))
       tree))
 
-;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
-;; sub-lexical scope even though this isn't an invocation of the macro.
 (defmacro! if-match ((test o!-str) conseq &optional altern)
   (let ((dollars (remove-duplicates
-                   (remove-if-not
-                    #'dollar-symbol-p
-                    (flatten conseq
-                     ;;(prune-if-match-bodies-from-sub-lexical-scope conseq)
-                     )))))
-    (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>)) 0)))
+                  (remove-if-not #'dollar-symbol-p (flatten conseq)))))
+    (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+                   0)))
       `(multiple-value-bind (,g!-s ,g!-e ,g!-ms ,g!-me) (,test ,o!-str)
-        (declare (ignorable ,g!-e ,g!-me))
-        (if ,g!-s
-            (if (< (length ,g!-ms) ,top)
-                (error "ifmatch: too few matches")
-                (let ,(mapcar #`(,(symb "$" a1) (subseq ,o!-str
-                                                        (aref ,g!-ms ,(1- a1))
-                                                        (aref ,g!-me ,(1- a1))))
-                              (loop for i from 1 to top collect i))
-                  ,conseq))
-            ,altern)))))
+         (declare (ignorable ,g!-e ,g!-me))
+         (if ,g!-s
+             (if (< (length ,g!-ms) ,top)
+                 (progn
+                   (print ,g!-ms)
+                   (print ,top)
+                   (error "ifmatch: too few matches"))
+                 (let ,(mapcar #`(,(symb "$" a1) (subseq ,o!-str
+                                                         (aref ,g!-ms ,(1- a1))
+                                                         (aref ,g!-me ,(1- a1))))
+                               (loop for i from 1 to top collect i))
+                   ,conseq))
+             ,altern)))))
+
+(defmacro! if-match ((test o!-str) conseq &optional altern)
+  (let ((dollars (remove-duplicates
+                  (remove-if-not #'dollar-symbol-p (flatten conseq)))))
+    (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+                   0)))
+      `(let ((,g!-matches (,test ,o!-str)))
+         (declare (ignorable , g!-matches))
+         (if ,g!-matches
+             (if (< (length ,g!-matches) ,top)
+                 (error "ifmatch: too few matches")
+                 (let ,(mapcar #`(,( symb "$" a1) (nth ,(1- a1)
+                                                       ,g!-matches))
+                               (loop for i from 1 to top collect i))
+                   ,conseq))
+             ,altern)))))
+
+(if-match (#~m/(a)bc/ "abc")
+          (progn
+            (ut::p "um" $1)
+            (if-match (#~m/abc/ "abc")
+                      (ut::p "dois" $1)
+                      'foi))
+          'foi)
+
 
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
-(in-package ut)
-
-(lol:if-match (#~m/(a)bc/ "abc")
-          (progn
-            (p "um" $1)
-            (lol:if-match (#~m/abc/ "abc")
-                      (p "dois" $1)
-                      'foi))
-          'foi)
-
 
 (defmacro! ifmatch ((test str) then &optional else)
   "Checks for the existence of group-capturing regex (in /for(bar)baz/, bar is capured) in the TEST and bind $1, $2, $n vars to the captured regex. Obviously, doesn't work with runtime regexes"
@@ -323,7 +336,7 @@
     `(multiple-value-bind (,g!-matches ,g!-arr) (,test ,str)
        (if (plusp (length ,g!-matches))
            (let* ((,g!-match-list (ppcre:split (format nil "(~a)" ,g!-matches)
-                                           ,str :with-registers-p t :limit 3))
+                                               ,str :with-registers-p t :limit 3))
                   ,@$-vars-let-form)
 
              (declare (ignorable ,@(mapcar #'car $-vars-let-form)))

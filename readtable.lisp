@@ -67,7 +67,7 @@
 
 (defmacro! match-mode-ppcre-lambda-form (o!-args o!-mods)
  ``(lambda (,',g!-str)
-     (CL-PPCRE:all-matches-as-strings
+     (ppcre:scan-to-strings
        ,(if (zerop (length ,o!-mods))
           (car ,o!-args)
           (format nil "(?~a)~a" ,o!-mods (car ,o!-args)))
@@ -75,7 +75,7 @@
 
 (defmacro! subst-mode-ppcre-lambda-form (o!-args)
  ``(lambda (,',g!-str)
-     (cl-ppcre:regex-replace-all
+     (ppcre:regex-replace-all
        ,(car ,o!-args)
        ,',g!-str
        ,(cadr ,o!-args))))
