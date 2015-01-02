@@ -11,12 +11,7 @@
                 #:flatten)
   (:import-from #:defmacro-enhance
                 #:defmacro!)
-  (:export #:fact
-           #:choose
-           #:dlambda
-           #:alambda
-           #:aif
-           #:alet%
+  (:export #:dlambda
            #:alet
            #:let-binding-transform
            #:pandoriclet
@@ -42,10 +37,7 @@
            #:build-batcher-sn
            #:sortf
            #:dollar-symbol-p
-           #:prune-if-match-bodies-from-sub-lexical-scope
            #:if-match
            #:when-match))
 
 (cl-reexport:reexport-from :lol.rt)
-
-;; EOF
