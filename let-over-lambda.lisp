@@ -252,10 +252,15 @@
     (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
                    0)))
       `(multiple-value-bind (,g!-match ,g!-matched-registers) (,test ,o!-str)
-         (declare (ignorable , g!-match))
          (if ,g!-match
              (if (< (length ,g!-matched-registers) ,top)
-                 (error "ifmatch: too few matches")
+                 (error ,(concatenate
+                         'string
+                         "IF-MATCH: too few matches. There is(are) "
+                         (write-to-string top)
+                         " matched register(s) but only ~a match(es) was(were) found in ~s.")
+                        (length ,g!-matched-registers)
+                        ,g!-matched-registers)
                  (let ,(mapcar #`(,( symb "$" a1) (aref ,g!-matched-registers
                                                         ,(1- a1)))
                                (loop for i from 1 to top collect i))
