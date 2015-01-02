@@ -254,16 +254,16 @@
                 "$"
                 :start1 0
                 :end1 1)
-       (ignore-errors (parse-integer (subseq (symbol-name s) 1)))))
+       (parse-integer (subseq (symbol-name s) 1) :junk-allowed t)))
 
 (defun prune-if-match-bodies-from-sub-lexical-scope (tree)
   (if (consp tree)
-    (if (or (eq (car tree) 'if-match)
-            (eq (car tree) 'when-match))
-      (cddr tree)
-      (cons (prune-if-match-bodies-from-sub-lexical-scope (car tree))
-            (prune-if-match-bodies-from-sub-lexical-scope (cdr tree))))
-    tree))
+      (if (or (eq (car tree) 'if-match)
+              (eq (car tree) 'when-match))
+          (cddr tree)
+          (cons (prune-if-match-bodies-from-sub-lexical-scope (car tree))
+                (prune-if-match-bodies-from-sub-lexical-scope (cdr tree))))
+      tree))
 
 ;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
 ;; sub-lexical scope even though this isn't an invocation of the macro.
@@ -271,8 +271,9 @@
   (let ((dollars (remove-duplicates
                    (remove-if-not
                     #'dollar-symbol-p
-                    (flatten
-                     (prune-if-match-bodies-from-sub-lexical-scope conseq))))))
+                    (flatten conseq
+                     ;;(prune-if-match-bodies-from-sub-lexical-scope conseq)
+                     )))))
     (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>)) 0)))
       `(multiple-value-bind (,g!-s ,g!-e ,g!-ms ,g!-me) (,test ,o!-str)
         (declare (ignorable ,g!-e ,g!-me))
@@ -289,5 +290,44 @@
 (defmacro when-match ((test str) conseq &rest more-conseq)
   `(if-match (,test ,str)
      (progn ,conseq ,@more-conseq)))
+(in-package ut)
+
+(lol:if-match (#~m/(a)bc/ "abc")
+          (progn
+            (p "um" $1)
+            (lol:if-match (#~m/abc/ "abc")
+                      (p "dois" $1)
+                      'foi))
+          'foi)
+
+
+(defmacro! ifmatch ((test str) then &optional else)
+  "Checks for the existence of group-capturing regex (in /for(bar)baz/, bar is capured) in the TEST and bind $1, $2, $n vars to the captured regex. Obviously, doesn't work with runtime regexes"
+  (let* ((regexp (second (third test)))
+         (how-many-$-vars (when (stringp regexp)
+                            (let ((regex-paretheses
+                                   (ppcre:all-matches-as-strings "\\((.*?)\\)"
+                                                                 regexp)))
+                              (print regex-paretheses)
+                              (length regex-paretheses))))
+         ($-vars-let-form
+          (append `((|$`| (first ,g!-match-list))
+                    ($&   (second ,g!-match-list))
+                    (|$'| (third ,g!-match-list)))
+                  (when how-many-$-vars
+                    (mapcar (lambda (var-num)
+                              `(,(symbolicate "$"
+                                              (write-to-string var-num))
+                                 (aref ,g!-arr ,(1- var-num))))
+                            (loop for i from 1 to how-many-$-vars collect i))))))
+    `(multiple-value-bind (,g!-matches ,g!-arr) (,test ,str)
+       (if (plusp (length ,g!-matches))
+           (let* ((,g!-match-list (ppcre:split (format nil "(~a)" ,g!-matches)
+                                           ,str :with-registers-p t :limit 3))
+                  ,@$-vars-let-form)
+
+             (declare (ignorable ,@(mapcar #'car $-vars-let-form)))
+             ,then)
+           ,else))))
 
 ;; EOF
