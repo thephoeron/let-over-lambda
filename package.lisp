@@ -25,6 +25,9 @@
            #:|#`-reader|
            #:alet%
            #:alet
+           #:it
+           #:this
+           #:self
            #:let-binding-transform
            #:pandoriclet
            #:pandoriclet-get
