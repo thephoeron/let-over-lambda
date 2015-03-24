@@ -3,27 +3,15 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
-  (:export #:mkstr
-           #:symb
-           #:group
-           #:flatten
-           #:fact
-           #:choose
-           #:g!-symbol-p
-           #:defmacro/g!
-           #:o!-symbol-p
-           #:o!-symbol-to-g!-symbol
-           #:defmacro!
-           #:|#"-reader|
-           #:segment-reader
-           #:match-mode-ppcre-lambda-form
-           #:subst-mode-ppcre-lambda-form
-           #:|#~-reader|
-           #:dlambda
-           #:alambda
-           #:aif
-           #:|#`-reader|
-           #:alet%
+  (:import-from #:named-readtables
+                #:defreadtable
+                #:in-readtable)
+  (:import-from #:on-lisp
+                #:symb
+                #:flatten)
+  (:import-from #:defmacro-enhance
+                #:defmacro!)
+  (:export #:dlambda
            #:alet
            #:it
            #:this
@@ -52,8 +40,9 @@
            #:build-batcher-sn
            #:sortf
            #:dollar-symbol-p
-           #:prune-if-match-bodies-from-sub-lexical-scope
            #:if-match
            #:when-match))
 
-;; EOF
+(in-package #:let-over-lambda)
+
+(cl-reexport:reexport-from :lol.rt)

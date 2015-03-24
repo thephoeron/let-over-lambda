@@ -19,8 +19,14 @@
   :author "Doug Hoyte <doug@hoytech.com>"
   :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
   :license "BSD Simplified"
-  :depends-on (#:cl-ppcre)
-  :components ((:file "package")
+  :depends-on (#:cl-ppcre
+               #:named-readtables
+               #:on-lisp
+               #:defmacro-enhance
+               #:cl-reexport
+               #:cl-heredoc)
+  :components ((:file "readtable")
+               (:file "package")
                (:file "let-over-lambda")))
 
 ;; EOF
