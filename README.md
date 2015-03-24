@@ -27,3 +27,6 @@ Make sure you have the latest Quicklisp distribution, then include it as a depen
 
 (A B C D E F G H I J K)
 ```
+
+### Contributors
+- [André Miranda](https://github.com/EuAndreh/)
