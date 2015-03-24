@@ -40,4 +40,6 @@
            #:if-match
            #:when-match))
 
+(in-package #:let-over-lambda)
+
 (cl-reexport:reexport-from :lol.rt)
