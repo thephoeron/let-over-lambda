@@ -43,9 +43,9 @@ the reading of this string is..."
 
 (deftest read-anaphor-sharp-backquote-test
   (is '#`((,a1))
-      '(lambda (a1) `((,a1))
-        :test #'equalp)
-      "SHARP-BACKQUOTE expands correctly.")
+      '(lambda (a1) `((,a1)))
+      "SHARP-BACKQUOTE expands correctly."
+      :test #'equalp)
   (is-expand #.(#3`(((,@a2)) ,a3 (,a1 ,a1))
                 (gensym)
                 '(a b c)
