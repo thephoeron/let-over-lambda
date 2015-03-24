@@ -1,6 +1,6 @@
 # let-over-lambda
 
-[https://travis-ci.org/EuAndreh/let-over-lambda.svg?branch=master]
+[](https://travis-ci.org/EuAndreh/let-over-lambda.svg?branch=master)
 
 Doug Hoyte's "Production" version of macros from Let Over Lambda, ready for ASDF and Quicklisp.
 
