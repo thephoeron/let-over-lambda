@@ -63,4 +63,5 @@ the reading of this string is..."
       '((declare (optimize (speed 1) (safety 2)))
         (declare (optimize (speed 2) (safety 1))))
       "SHARP-F correctly expands into rarely used compiler options."))
+
 (run-test-all)
