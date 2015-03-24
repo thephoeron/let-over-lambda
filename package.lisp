@@ -27,6 +27,7 @@
            #:alambda
            #:aif
            #:|#`-reader|
+           #:|#f-reader|
            #:nlet-tail
            #:alet%
            #:alet
