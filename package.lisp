@@ -27,6 +27,7 @@
            #:alambda
            #:aif
            #:|#`-reader|
+           #:nlet-tail
            #:alet%
            #:alet
            #:let-binding-transform
