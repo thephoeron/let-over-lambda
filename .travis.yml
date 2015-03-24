@@ -2,7 +2,7 @@ language: common-lisp
 
 env:
   matrix:
-    - LISP=allego
+    - LISP=allegro
     - LISP=sbcl
     - LISP=ccl
     - LISP=clisp
