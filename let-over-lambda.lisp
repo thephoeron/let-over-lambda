@@ -280,7 +280,6 @@
     #+cl-ppcre
     (:dispatch-macro-char #\# #\~ #'|#~-reader|)
     (:dispatch-macro-char #\# #\` #'|#`-reader|)
-    (:dispatch-macro-char #\# #\` #'|#`-reader|)
     (:dispatch-macro-char #\# #\f #'|#f-reader|)))
 
 (in-readtable lol-syntax)
