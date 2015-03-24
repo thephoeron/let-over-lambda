@@ -7,6 +7,7 @@ env:
     - LISP=ccl
     - LISP=clisp
     - LISP=ecl
+    - LISP=abcl
 
 install:
   - if [ -x ./install.sh ] && head -2 ./install.sh | grep '^# cl-travis' > /dev/null;
