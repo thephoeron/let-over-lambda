@@ -9,11 +9,11 @@
 ;; NOTE: To run this test file, execute `(asdf:test-system :let-over-lambda)' in your Lisp.
 
 (plan 5)
-#|
- (deftest |test-#""#-read-macro|
+
+(deftest |test-#""#-read-macro|
   (is  #"Contains " and \."#
    "Contains \" and \\." "SHARP-QUOTE read macro works as expected."   ))
-|#
+
 (defparameter heredoc-string #>END
 I can put anything here: ", , "# and ># are
 no problem. The only thing that will terminate
