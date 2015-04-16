@@ -1,5 +1,7 @@
 # let-over-lambda
 
+[![Build Status](https://travis-ci.org/EuAndreh/let-over-lambda.svg?branch=master)](https://travis-ci.org/EuAndreh/let-over-lambda)
+
 Doug Hoyte's "Production" version of macros from Let Over Lambda, ready for ASDF and Quicklisp.
 
 Read more about the book and code at: http://letoverlambda.com
@@ -29,3 +31,6 @@ Make sure you have the latest Quicklisp distribution, then include it as a depen
 
 (A B C D E F G H I J K)
 ```
+
+### Contributors
+- [André Miranda](https://github.com/EuAndreh/)

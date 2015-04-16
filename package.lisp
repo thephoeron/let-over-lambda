@@ -3,7 +3,11 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
-  (:export #:mkstr
+  (:import-from #:named-readtables
+                #:defreadtable
+                #:in-readtable)
+  (:export #:lol-syntax
+           #:mkstr
            #:symb
            #:group
            #:flatten
@@ -23,6 +27,8 @@
            #:alambda
            #:aif
            #:|#`-reader|
+           #:|#f-reader|
+           #:nlet-tail
            #:alet%
            #:alet
            #:it
