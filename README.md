@@ -1,12 +1,10 @@
-# let-over-lambda
+# LET-OVER-LAMBDA
 
 [![Build Status](https://travis-ci.org/EuAndreh/let-over-lambda.svg?branch=master)](https://travis-ci.org/EuAndreh/let-over-lambda)
 
 Doug Hoyte's "Production" version of macros from Let Over Lambda, ready for ASDF and Quicklisp.
 
 Read more about the book and code at: http://letoverlambda.com
-
-Includes minor modifications by Jorge Gajon <gajon@gajon.org>.
 
 #### UPDATE 3/19/2015
 
@@ -33,4 +31,8 @@ Make sure you have the latest Quicklisp distribution, then include it as a depen
 ```
 
 ### Contributors
+
+- [Doug Hoyte](https://github.com/hoytech)
+- ["the Phoeron" Colin J.E. Lupton](https://github.com/thephoeron)
+- [Jorge Gajon](https://github.com/gajon)
 - [André Miranda](https://github.com/EuAndreh/)
