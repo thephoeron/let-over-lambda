@@ -10,6 +10,8 @@
 (defsystem #:let-over-lambda-test
   :serial t
   :description "The test code for Let Over Lambda."
+  :author "André Miranda <andremiramor@gmail.com>"
+  :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
   :license "BSD Simplified"
   :depends-on (#:let-over-lambda
                #:prove
