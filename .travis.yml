@@ -1,4 +1,4 @@
-language: lisp
+language: commonlisp
 
 env:
   matrix:
