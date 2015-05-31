@@ -1,4 +1,5 @@
-;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.asd
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA-TEST-ASD; Base: 10 -*-
+;;;; file: let-over-lambda-test.asd
 
 (in-package :cl-user)
 
