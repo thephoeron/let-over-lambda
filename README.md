@@ -1,6 +1,6 @@
 # LET-OVER-LAMBDA
 
-[![Build Status](https://travis-ci.org/thephoeron/let-over-lambda.svg?branch=master)](https://travis-ci.org/thephoeron/let-over-lambda)
+[![Build Status](https://travis-ci.org/EuAndreh/let-over-lambda.svg?branch=master)](https://travis-ci.org/EuAndreh/let-over-lambda)
 
 Doug Hoyte's "Production" version of macros from Let Over Lambda; available from Quicklisp.
 
