@@ -9,6 +9,7 @@
 
 (defsystem #:let-over-lambda-test
   :serial t
+  :version #.let-over-lambda-asd:*lol-version*
   :description "The test code for Let Over Lambda."
   :author "André Miranda <andremiramor@gmail.com>"
   :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
