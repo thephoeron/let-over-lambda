@@ -93,7 +93,9 @@
   (let* ((syms (remove-duplicates
                 (remove-if-not #'g!-symbol-p
                                (flatten body))))
-         (docstring (car body))
+         (docstring (if (stringp (car body))
+                        (car body)
+                        nil))
          (body (if (stringp docstring)
                    (cdr body)
                    body)))
@@ -110,7 +112,9 @@
 (defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p args))
          (gs (mapcar #'o!-symbol-to-g!-symbol os))
-         (docstring (car body))
+         (docstring (if (stringp (car body))
+                        (car body)
+                        nil))
          (body (if (stringp docstring)
                    (cdr body)
                    body)))
