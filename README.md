@@ -1,5 +1,7 @@
 # LET-OVER-LAMBDA
 
+[![Join the chat at https://gitter.im/thephoeron/let-over-lambda](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/thephoeron/let-over-lambda?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/thephoeron/let-over-lambda.svg?branch=master)](https://travis-ci.org/thephoeron/let-over-lambda)
 [![Available in Quicklisp](https://img.shields.io/badge/quicklisp-available-brightgreen.svg)](https://quicklisp.org/)
 [![BSD Simplified License](https://img.shields.io/badge/license-BSD%20Simplified-blue.svg)](./LICENSE)
