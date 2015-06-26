@@ -14,7 +14,7 @@
 (plan 6)
 
 (deftest |test-#""#-read-macro|
-  (is #"Contains \" and \."#
+  (is #"Contains " and \."#
       "Contains \" and \\."
       "SHARP-QUOTE read macro works as expected."))
 
