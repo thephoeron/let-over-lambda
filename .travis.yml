@@ -4,11 +4,11 @@ sudo: required
 
 env:
   matrix:
-    - LISP=sbcl
+    - LISP=sbcl COVERALLS=true
     - LISP=ccl
-    - LISP=clisp
-    - LISP=ecl
-    - LISP=abcl
+    # - LISP=clisp
+    # - LISP=ecl
+    # - LISP=abcl
 
 install:
   - if [ -x ./install.sh ] && head -2 ./install.sh | grep '^# cl-travis' > /dev/null;
