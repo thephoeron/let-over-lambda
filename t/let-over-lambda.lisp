@@ -1,18 +1,27 @@
 (in-package cl-user)
+
 (defpackage let-over-lambda-test
   (:use cl let-over-lambda prove)
   (:import-from named-readtables
                 in-readtable))
+
 (in-package let-over-lambda-test)
+
 (in-readtable lol-syntax)
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :let-over-lambda)' in your Lisp.
 
-(plan 5)
+(plan 6)
 
 (deftest |test-#""#-read-macro|
-  (is  #"Contains " and \."#
-   "Contains \" and \\." "SHARP-QUOTE read macro works as expected."   ))
+  (is #"Contains \" and \."#
+      "Contains \" and \\."
+      "SHARP-QUOTE read macro works as expected."))
+
+(deftest flatten-test
+  (is (flatten '((A . B) (C D (E) (F (G)))))
+      '(A B C D E F G)
+      "FLATTEN function works as expected."))
 
 (defparameter heredoc-string #>END
 I can put anything here: ", , "# and ># are
