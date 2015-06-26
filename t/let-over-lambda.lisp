@@ -18,10 +18,15 @@
       "Contains \" and \\."
       "SHARP-QUOTE read macro works as expected."))
 
+(defparameter flatten-list '(D (E (F (G)))))
+
 (deftest flatten-test
   (is (flatten '((A . B) (C D (E) (F (G)))))
       '(A B C D E F G)
-      "FLATTEN function works as expected."))
+      "FLATTEN function works as expected.")
+  (is (flatten `(A B C ,flatten-list))
+      '(A B C D E F G)
+      "FLATTEN on quasiquotes works as expected."))
 
 (defparameter heredoc-string #>END
 I can put anything here: ", , "# and ># are
