@@ -13,11 +13,6 @@
 
 (plan 6)
 
-(deftest |test-#""#-read-macro|
-  (is #"Contains " and \."#
-      "Contains \" and \\."
-      "SHARP-QUOTE read macro works as expected."))
-
 (defparameter flatten-list '(D (E (F (G)))))
 
 (deftest flatten-test
@@ -78,5 +73,10 @@ the reading of this string is..."
       '((declare (optimize (speed 1) (safety 2)))
         (declare (optimize (speed 2) (safety 1))))
       "SHARP-F correctly expands into rarely used compiler options."))
+
+(deftest |test-#""#-read-macro|
+  (is #"Contains " and \."#
+      "Contains \" and \\."
+      "SHARP-QUOTE read macro works as expected."))
 
 (run-test-all)
