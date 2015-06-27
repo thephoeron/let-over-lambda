@@ -13,7 +13,7 @@
 
 (plan 6)
 
-(defparameter flatten-list '(D (E (F (G)))))
+(defparameter flatten-list '(D (E `(F ,'(G)))))
 
 (deftest flatten-test
   (is (flatten '((A . B) (C D (E) (F (G)))))
