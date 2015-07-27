@@ -207,7 +207,7 @@
 #+cl-ppcre
 (defmacro! match-mode-ppcre-lambda-form (o!args o!mods)
  ``(lambda (,',g!str)
-     (cl-ppcre:scan
+     (ppcre:scan-to-strings
        ,(if (zerop (length ,g!mods))
           (car ,g!args)
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
