@@ -11,7 +11,7 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :let-over-lambda)' in your Lisp.
 
-(plan 6)
+(plan 7)
 
 (defparameter flatten-list `(D (E (F ,'(G)))))
 
@@ -78,5 +78,48 @@ the reading of this string is..."
   (is #"Contains " and \."#
       "Contains \" and \\."
       "SHARP-QUOTE read macro works as expected."))
+
+(deftest if-match-test
+  (is (if-match (#~m_a(b)c_ "abc")
+          $1)
+      "b"
+      "IF-MATCH correctly returns the single capture.")
+  (is-error (if-match (#~m_a(b)c_ "abc")
+                $2)
+            'simple-error
+            "IF-MATCH throws an error when $2 is unbound.")
+  (is (if-match (#~m_a(b)c_ "def")
+          $1
+          :else)
+      :else
+      "When IF-MATCH test is false it goes to the else body.")
+  (is (if-match (#~m_a(b)c_ "abc")
+          (if-match (#~m_(d)(e)f_ "def")
+              (list $1 $2)
+              :no-second-match)
+          $1)
+      '("d" "e")
+      "IF-MATCH works with nested IF-MATCHs.")
+  (is (if-match (#~m_a(b)c_ "abc")
+          (if-match (#~m_(d)(e)f_ "d ef")
+              (list $1 $2)
+              :no-second-match)
+          $1)
+      :no-second-match
+      "IF-MATCH works with nested IF-MATCHs.")
+  (is-error (if-match (#~m_a(b)c_ "ab c")
+                (if-match (#~m_(d)(e)f_ "d ef")
+                    (list $1 $2)
+                    :no-second-match)
+                $1)
+            'simple-error
+            "IF-MATCH throws an error, even when nested.")
+  (is-error (if-match (#~m_a(b)c_ "ab c")
+                (if-match (#~m_(d)(e)f_ "d ef")
+                    (list $1 $2)
+                    :no-second-match)
+                $2)
+            'simple-error
+            "IF-MATCH throws an error, even when nested."))
 
 (run-test-all)
