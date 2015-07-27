@@ -37,13 +37,13 @@ the reading of this string is..."
 
 (deftest pilfered-perl-regex-syntax-test
   (is-expand '#~m|\w+tp://|
-             '(lambda ($str) (cl-ppcre:scan "\\w+tp://" $str))
+             '(lambda ($str) (cl-ppcre:scan-to-strings "\\w+tp://" $str))
              "#~m expands correctly.")
   (is-expand '#~s/abc/def/
              '(lambda ($str) (cl-ppcre:regex-replace-all "abc" $str "def"))
              "#~s expands correctly.")
   (is-values (#~m/abc/ "123abc")
-             '(3 6 #() #())
+             '("abc" #())
              "#~m runs correctly."
              :test #'equalp)
   (is (#~s/abc/def/ "Testing abc testing abc")
