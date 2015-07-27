@@ -110,7 +110,7 @@
          ,@body))))
 
 (defmacro defmacro! (name args &rest body)
-  (let* ((os (remove-if-not #'o!-symbol-p args))
+  (let* ((os (remove-if-not #'o!-symbol-p (flatten args)))
          (gs (mapcar #'o!-symbol-to-g!-symbol os))
          (docstring (if (stringp (car body))
                         (car body)
@@ -529,37 +529,28 @@
                 :end1 1)
        (ignore-errors (parse-integer (subseq (symbol-name s) 1)))))
 
-(defun prune-if-match-bodies-from-sub-lexical-scope (tree)
-  (if (consp tree)
-    (if (or (eq (car tree) 'if-match)
-            (eq (car tree) 'when-match))
-      (cddr tree)
-      (cons (prune-if-match-bodies-from-sub-lexical-scope (car tree))
-            (prune-if-match-bodies-from-sub-lexical-scope (cdr tree))))
-    tree))
-
-;; WARNING: Not %100 correct. Removes forms like (... if-match ...) from the
-;; sub-lexical scope even though this isn't an invocation of the macro.
-#+cl-ppcre
-(defmacro! if-match ((test str) conseq &optional altern)
-  (let ((dollars (remove-duplicates
+(defmacro! if-match ((match-regex str) then &optional else)
+  (let* ((dollars (remove-duplicates
                    (remove-if-not #'dollar-symbol-p
-                                  (flatten (prune-if-match-bodies-from-sub-lexical-scope conseq))))))
-    (let ((top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>)) 0)))
-      `(let ((,g!str ,str))
-         (multiple-value-bind (,g!s ,g!e ,g!ms ,g!me) (,test ,g!str)
-           (declare (ignorable ,g!e ,g!me))
-           (if ,g!s
-             (if (< (length ,g!ms) ,top)
-               (error "ifmatch: too few matches")
-               (let ,(mapcar #`(,(symb "$" a1) (subseq ,g!str (aref ,g!ms ,(1- a1))
-                                                              (aref ,g!me ,(1- a1))))
-                             (loop for i from 1 to top collect i))
-                 ,conseq))
-              ,altern))))))
+                                  (flatten then))))
+         (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+                  0)))
+    `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+       (declare (ignorable ,g!matches ,g!captures))
+       (let ((,g!captures-len (length ,g!captures)))
+         (declare (ignorable ,g!captures-len))
+         (symbol-macrolet ,(mapcar #`(,(symb "$" a1)
+                                       (if (< ,g!captures-len ,a1)
+                                           (error "Too few matchs: ~a unbound." ,(mkstr "$" a1))
+                                           (aref ,g!captures ,(1- a1))))
+                                   (loop for i from 1 to top collect i))
+           (if ,g!matches
+               ,then
+               ,else))))))
 
-(defmacro when-match ((test str) conseq &rest more-conseq)
-  `(if-match (,test ,str)
-     (progn ,conseq ,@more-conseq)))
+
+(defmacro when-match ((match-regex str) &body forms)
+  `(if-match (,match-regex ,str)
+     (progn ,@forms)))
 
 ;; EOF
