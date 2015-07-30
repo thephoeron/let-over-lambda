@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/thephoeron/let-over-lambda.svg?branch=master)](https://travis-ci.org/thephoeron/let-over-lambda)
 [![Coverage Status](https://coveralls.io/repos/thephoeron/let-over-lambda/badge.svg?branch=master)](https://coveralls.io/r/thephoeron/let-over-lambda)
-[![Available in Quicklisp](https://img.shields.io/badge/quicklisp-available-brightgreen.svg)](https://quicklisp.org/)
+[![Quicklisp](http://quickdocs.org/badge/let-over-lambda.svg)](http://quickdocs.org/let-over-lambda/)
 [![BSD Simplified License](https://img.shields.io/badge/license-BSD%20Simplified-blue.svg)](./LICENSE)
 
 Doug Hoyte's "Production" version of macros from Let Over Lambda, including community updates; available from Quicklisp.
