@@ -18,6 +18,7 @@
            #:o!-symbol-p
            #:o!-symbol-to-g!-symbol
            #:defmacro!
+           #:defun!
            #:|#"-reader|
            #:segment-reader
            #:match-mode-ppcre-lambda-form

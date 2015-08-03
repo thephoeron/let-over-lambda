@@ -123,6 +123,23 @@
        `(let ,(mapcar #'list (list ,@gs) (list ,@os))
           ,(progn ,@body)))))
 
+(defmacro defun! (name args &body body)
+  (let* ((syms (remove-duplicates
+                (remove-if-not #'g!-symbol-p
+                               (flatten body))))
+         (docstring (when (stringp (car body))
+                      (list (car body))))
+         (body (if (stringp docstring)
+                   (cdr body)
+                   body)))
+    `(defun ,name ,args
+       ,@docstring
+        (let ,(mapcar (lambda (s)
+                        `(,s (gensym ,(subseq (symbol-name s)
+                                              2))))
+                      syms)
+          ,@body))))
+
 ;; Nestable suggestion from Daniel Herring
 (eval-when (:compile-toplevel :load-toplevel :execute)
  (defun |#"-reader| (stream sub-char numarg)
