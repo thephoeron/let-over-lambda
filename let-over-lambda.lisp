@@ -125,7 +125,7 @@
         (parse-body body :documentation t)
       `(defun ,name ,args
          ,docstring
-         ,@declare-form
+         ,@declarations
          (let ,(mapcar (lambda (s)
                          `(,s (gensym ,(subseq (symbol-name s)
                                                2))))
