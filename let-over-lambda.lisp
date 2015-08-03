@@ -93,12 +93,17 @@
   (let* ((syms (remove-duplicates
                 (remove-if-not #'g!-symbol-p
                                (flatten body))))
-         (docstring (if (stringp (car body))
-                        (car body)
-                        nil))
-         (body (if (stringp docstring)
-                   (cdr body)
-                   body)))
+         (docstring (when (stringp (car body))
+                      (list (car body))))
+         (declare-form (if docstring
+                           (when (eq 'cl:declare (caadr body))
+                             (list (cadr body)))
+                           (when (eq 'cl:declare (caar body))
+                             (list (car body))))))
+    (when docstring
+      (setf body (cdr body)))
+    (when declare-form
+      (setf body (cdr body)))
     `(defmacro ,name ,args
        ,docstring
        (let ,(mapcar
@@ -112,14 +117,20 @@
 (defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p (flatten args)))
          (gs (mapcar #'o!-symbol-to-g!-symbol os))
-         (docstring (if (stringp (car body))
-                        (car body)
-                        nil))
-         (body (if (stringp docstring)
-                   (cdr body)
-                   body)))
+         (docstring (when (stringp (car body))
+                      (list (car body))))
+         (declare-form (if docstring
+                           (when (eq 'cl:declare (caadr body))
+                             (list (cadr body)))
+                           (when (eq 'cl:declare (caar body))
+                             (list (car body))))))
+    (when docstring
+      (setf body (cdr body)))
+    (when declare-form
+      (setf body (cdr body)))
     `(defmacro/g! ,name ,args
-       ,docstring
+       ,@docstring
+       ,@declare-form
        `(let ,(mapcar #'list (list ,@gs) (list ,@os))
           ,(progn ,@body)))))
 
@@ -130,11 +141,11 @@
          (docstring (when (stringp (car body))
                       (list (car body))))
          (declare-form (if docstring
-                           (when (eq 'declare (caadr body))
+                           (when (eq 'cl:declare (caadr body))
                              (list (cadr body)))
-                           (when (eq 'declare (caar body))
+                           (when (eq 'cl:declare (caar body))
                              (list (car body))))))
-    (when (stringp (car docstring))
+    (when docstring
       (setf body (cdr body)))
     (when declare-form
       (setf body (cdr body)))
