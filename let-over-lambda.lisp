@@ -96,7 +96,8 @@
     (multiple-value-bind (body declarations docstring)
         (parse-body body :documentation t)
       `(defmacro ,name ,args
-         ,docstring
+         ,@(when docstring
+             (list docstring))
          ,@declarations
          (let ,(mapcar
                 (lambda (s)
@@ -112,7 +113,8 @@
     (multiple-value-bind (body declarations docstring)
         (parse-body body :documentation t)
       `(defmacro/g! ,name ,args
-         ,docstring
+         ,@(when docstring
+            (list docstring))
          ,@declarations
          `(let ,(mapcar #'list (list ,@gs) (list ,@os))
             ,(progn ,@body))))))
@@ -124,7 +126,8 @@
     (multiple-value-bind (body declarations docstring)
         (parse-body body :documentation t)
       `(defun ,name ,args
-         ,docstring
+         ,@(when docstring
+             (list docstring))
          ,@declarations
          (let ,(mapcar (lambda (s)
                          `(,s (gensym ,(subseq (symbol-name s)
