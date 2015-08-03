@@ -3,6 +3,8 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
+  (:import-from #:alexandria
+                #:parse-body)
   (:import-from #:named-readtables
                 #:defreadtable
                 #:in-readtable)
