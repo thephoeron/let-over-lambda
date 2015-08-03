@@ -129,16 +129,23 @@
                                (flatten body))))
          (docstring (when (stringp (car body))
                       (list (car body))))
-         (body (if (stringp docstring)
-                   (cdr body)
-                   body)))
+         (declare-form (if docstring
+                           (when (eq 'declare (caadr body))
+                             (list (cadr body)))
+                           (when (eq 'declare (caar body))
+                             (list (car body))))))
+    (when (stringp (car docstring))
+      (setf body (cdr body)))
+    (when declare-form
+      (setf body (cdr body)))
     `(defun ,name ,args
        ,@docstring
-        (let ,(mapcar (lambda (s)
-                        `(,s (gensym ,(subseq (symbol-name s)
-                                              2))))
-                      syms)
-          ,@body))))
+       ,@declare-form
+       (let ,(mapcar (lambda (s)
+                       `(,s (gensym ,(subseq (symbol-name s)
+                                             2))))
+                     syms)
+         ,@body))))
 
 ;; Nestable suggestion from Daniel Herring
 (eval-when (:compile-toplevel :load-toplevel :execute)
