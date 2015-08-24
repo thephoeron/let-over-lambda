@@ -11,7 +11,19 @@
 
 ;; NOTE: To run this test file, execute `(asdf:test-system :let-over-lambda)' in your Lisp.
 
-(plan 7)
+(plan 8)
+
+(defun! fn! ()
+  `(let ((,g!test 123))
+     ,g!test))
+
+(defmacro fn-macro ()
+  (fn!))
+
+(deftest defun!-test
+  (is-expand (fn-macro)
+             (LET (($TEST 123))
+               $TEST)))
 
 (defparameter flatten-list `(D (E (F ,'(G)))))
 
