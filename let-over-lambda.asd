@@ -22,6 +22,7 @@
                #:cl-ppcre
                #:named-readtables)
   :components ((:file "package")
-               (:file "let-over-lambda")))
+               (:file "let-over-lambda"))
+  :in-order-to ((test-op (test-op let-over-lambda-test))))
 
 ;; EOF
