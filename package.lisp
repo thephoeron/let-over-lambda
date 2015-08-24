@@ -3,6 +3,8 @@
 (defpackage #:let-over-lambda
   (:nicknames #:lol)
   (:use #:cl #:cl-user #:cl-ppcre)
+  (:import-from #:alexandria
+                #:parse-body)
   (:import-from #:named-readtables
                 #:defreadtable
                 #:in-readtable)
@@ -18,6 +20,7 @@
            #:o!-symbol-p
            #:o!-symbol-to-g!-symbol
            #:defmacro!
+           #:defun!
            #:|#"-reader|
            #:segment-reader
            #:match-mode-ppcre-lambda-form
