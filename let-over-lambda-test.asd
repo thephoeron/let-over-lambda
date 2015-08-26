@@ -4,13 +4,13 @@
 (in-package :cl-user)
 
 (defpackage let-over-lambda-test-asd
-  (:use :cl :asdf :let-over-lambda-asd))
+  (:use :cl :asdf))
 
 (in-package :let-over-lambda-test-asd)
 
 (defsystem #:let-over-lambda-test
   :serial t
-  :version #.let-over-lambda-asd:*lol-version*
+  :version "1.0.1"
   :description "The test code for Let Over Lambda."
   :author "André Miranda <andremiramor@gmail.com>"
   :maintainer "\"the Phoeron\" Colin J.E. Lupton <sysop@thephoeron.com>"
