@@ -4,7 +4,7 @@
 (in-package :cl-user)
 
 (defpackage let-over-lambda-test-asd
-  (:use :cl :asdf))
+  (:use :cl :asdf :let-over-lambda-asd))
 
 (in-package :let-over-lambda-test-asd)
 
