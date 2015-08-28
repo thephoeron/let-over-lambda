@@ -1,5 +1,6 @@
 # LET-OVER-LAMBDA
 
+[![Build Status](https://circleci.com/gh/thephoeron/let-over-lambda.svg?style=shield)](https://circleci.com/gh/thephoeron/let-over-lambda)
 [![Build Status](https://travis-ci.org/thephoeron/let-over-lambda.svg?branch=master)](https://travis-ci.org/thephoeron/let-over-lambda)
 [![Coverage Status](https://coveralls.io/repos/thephoeron/let-over-lambda/badge.svg?branch=master)](https://coveralls.io/r/thephoeron/let-over-lambda)
 [![Quicklisp](http://quickdocs.org/badge/let-over-lambda.svg)](http://quickdocs.org/let-over-lambda/)
