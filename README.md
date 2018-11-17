@@ -1,3 +1,5 @@
+# This version clobbers the global readtable. If you want to type `(named-readtables:in-readtable lol:lol-syntax)` at the top of every file which
+uses the reader macros then go to (https://github.com/thephoeron/let-over-lambda)
 # LET-OVER-LAMBDA
 
 [![Build Status](https://circleci.com/gh/thephoeron/let-over-lambda.svg?style=shield)](https://circleci.com/gh/thephoeron/let-over-lambda)
@@ -38,7 +40,7 @@ Make sure you have the latest Quicklisp distribution, then include it as a depen
 LET-OVER-LAMBDA now uses the `named-readtables` library instead of modifying the global readtable. To use LOL reader macros in your Lisp source files, you will have to add both `let-over-lambda` and `named-readtables` to your project dependencies, and the following line after your call to `in-package`, in every source file you wish to use LOL syntax:
 
 ```lisp
-(named-readtables:in-readtable lol:lol-syntax)
+`(named-readtables:in-readtable lol:lol-syntax)`
 ```
 
 ## Contributors
