@@ -181,12 +181,8 @@
 				      (symbol-name s)
 				      2))))
 		     syms)
-		,@body))))
-      ;; (princ `(defmacro ,name ,args
-      ;; 	  `(defmacro/g! ,',name ,',args
-      ;; 	     `(let ,',(mapcar #'list ',gs (list ,@os))
-      ;; 		,(progn ,@,body)))))
-      )))
+		`(let ,(mapcar #'list (list ,@gs) (list ,@os))
+		   ,(progn ,@body)))))))))
 #+sbcl
 (set-dispatch-macro-character #\# #\d #'defmacro!-reader)
     ;; (multiple-value-bind (body declarations docstring)
