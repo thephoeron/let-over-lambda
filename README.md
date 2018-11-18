@@ -17,7 +17,7 @@ Read more about the book and code at: http://letoverlambda.com
 ## News &amp; Updates
 ##### 16/11/2018
 
-This project forked by me!
+Reader macros for `defmacro!` (`#g{...}`)and `defmacro/g!` (`#d{...}`) added by [Spenser Truex](https://github.com/equwal/). SBCL now can have functionality of them thanks to this.
 
 ##### 3/19/2015
 
@@ -53,3 +53,4 @@ LET-OVER-LAMBDA now uses the `named-readtables` library instead of modifying the
 - ["the Phoeron" Colin J.E. Lupton](https://github.com/thephoeron)
 - [Jorge Gajon](https://github.com/gajon)
 - [André Miranda](https://github.com/EuAndreh/)
+- [Spenser Truex](https://github.com/equwal/)

@@ -50,47 +50,6 @@
                      (cons source acc))))))
     (if source (rec source nil) nil)))
 
-(eval-when (:compile-toplevel :execute :load-toplevel)
-  (defun mkstr (&rest args)
-    (with-output-to-string (s)
-      (dolist (a args) (princ a s))))
-  (defun symb (&rest args)
-    (values (intern (apply #'mkstr args))))
-  (defun flatten (x)
-    (labels ((rec (x acc)
-                  (cond ((null x) acc)
-                        #+(and sbcl (not lol::old-sbcl))
-                        ((typep x 'sb-impl::comma) (rec (sb-impl::comma-expr x) acc))
-                        ((atom x) (cons x acc))
-                        (t (rec
-                             (car x)
-                             (rec (cdr x) acc))))))
-      (rec x nil)))
-
-  (defun g!-symbol-p (s)
-    (and (symbolp s)
-         (> (length (symbol-name s)) 2)
-         (or (string= (symbol-name s)
-		   "G!"
-		   :start1 0
-		   :end1 2)
-	     #+sbcl(string= (symbol-name s)
-			    ",G!"
-			    :start1 0
-			    :end1 3))))
-
-  (defun o!-symbol-p (s)
-    (and (symbolp s)
-         (> (length (symbol-name s)) 2)
-         (string= (symbol-name s)
-                  "O!"
-                  :start1 0
-                  :end1 2)))
-
-  (defun o!-symbol-to-g!-symbol (s)
-    (symb "G!"
-          (subseq (symbol-name s) 2))))
-
 #-sbcl
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
@@ -220,7 +179,7 @@
       (cons (coerce (nreverse chars) 'string)
             (segment-reader stream ch (- n 1))))))
 
-#+cl-ppcre
+#+(and cl-ppcre (not sbcl))
 (defmacro! match-mode-ppcre-lambda-form (o!args o!mods)
  ``(lambda (,',g!str)
      (ppcre:scan-to-strings
@@ -228,15 +187,28 @@
           (car ,g!args)
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
        ,',g!str)))
-
-#+cl-ppcre
+#+(and cl-ppcre sbcl)
+#d{match-mode-ppcre-lambda-form (o!args o!mods)
+     ``(lambda (,',g!str)
+	 (ppcre:scan-to-strings
+	  ,(if (zerop (length ,g!mods))
+	       (car ,g!args)
+	       (format nil "(?~a)~a" ,g!mods (car ,g!args)))
+	  ,',g!str))}
+#+(and cl-ppcre (not sbcl))
 (defmacro! subst-mode-ppcre-lambda-form (o!args)
  ``(lambda (,',g!str)
      (cl-ppcre:regex-replace-all
        ,(car ,g!args)
        ,',g!str
        ,(cadr ,g!args))))
-
+#+(and cl-ppcre sbcl)
+#d{subst-mode-ppcre-lambda-form (o!args)
+     ``(lambda (,',g!str)
+	 (cl-ppcre:regex-replace-all
+	  ,(car ,g!args)
+	  ,',g!str
+	  ,(cadr ,g!args)))}
 #+cl-ppcre
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun |#~-reader| (stream sub-char numarg)
@@ -261,7 +233,7 @@
         (t (error "Unknown #~~ mode character"))))))
 
  #+cl-ppcre (set-dispatch-macro-character #\# #\~ #'|#~-reader|)
-
+#-sbcl
 (defmacro! dlambda (&rest ds)
   `(lambda (&rest ,g!args)
      (case (car ,g!args)
@@ -275,6 +247,20 @@
                          g!args
                          `(cdr ,g!args)))))
            ds))))
+#+sbcl
+#d{dlambda (&rest ds)
+       `(lambda (&rest ,g!args)
+	  (case (car ,g!args)
+	    ,@(mapcar
+	       (lambda (d)
+		 `(,(if (eq t (car d))
+			t
+			(list (car d)))
+		    (apply (lambda ,@(cdr d))
+			   ,(if (eq t (car d))
+				g!args
+				`(cdr ,g!args)))))
+	       ds)))}
 
 ;; Graham's alambda
 (defmacro alambda (parms &body body)
@@ -305,6 +291,7 @@
   (set-dispatch-macro-character #\# #\` #'|#`-reader|)
   (set-dispatch-macro-character #\# #\f #'|#f-reader|))
 
+#-sbcl
 (defmacro! nlet-tail (n letargs &body body)
   (let ((gs (loop for i in letargs
                collect (gensym))))
@@ -323,6 +310,25 @@
            (tagbody
               ,g!n (return-from
                     ,g!b (progn ,@body))))))))
+#+sbcl
+#d{nlet-tail (n letargs &body body)
+    (let ((gs (loop for i in letargs
+		 collect (gensym))))
+      `(macrolet
+	   ((,n ,gs
+	      `(progn
+		 (psetq
+		  ,@(apply #'nconc
+			   (mapcar
+			    #'list
+			    ',(mapcar #'car letargs)
+			    (list ,@gs))))
+		 (go ,',g!n))))
+	 (block ,g!b
+	   (let ,letargs
+	     (tagbody
+		,g!n (return-from
+		      ,g!b (progn ,@body)))))))}
 
 (defmacro alet% (letargs &rest body)
   `(let ((this) ,@letargs)
@@ -514,6 +520,7 @@
       (setf p (ash p -1)))
     (nreverse network)))
 
+#-sbcl
 (defmacro! sortf (comparator &rest places)
   (if places
     `(tagbody
@@ -524,6 +531,17 @@
                  (setf #1# ,g!b
                        #2# ,g!a)))
            (build-batcher-sn (length places))))))
+#+sbcl
+#d{sortf (comparator &rest places)
+    (if places
+	`(tagbody
+	    ,@(mapcar
+	       #`(let ((,g!a #1=,(nth (car a1) places))
+		       (,g!b #2=,(nth (cadr a1) places)))
+		   (if (,comparator ,g!b ,g!a)
+		       (setf #1# ,g!b
+			     #2# ,g!a)))
+	       (build-batcher-sn (length places)))))}
 
 ;;;;;; NEW CODE FOR ANTIWEB
 #+cl-ppcre
@@ -536,6 +554,7 @@
                 :end1 1)
        (ignore-errors (parse-integer (subseq (symbol-name s) 1)))))
 
+#-sbcl
 (defmacro! if-match ((match-regex str) then &optional else)
   (let* ((dollars (remove-duplicates
                    (remove-if-not #'dollar-symbol-p
@@ -555,9 +574,28 @@
                ,then
                ,else))))))
 
+#d{if-match ((match-regex str) then &optional else)
+    (let* ((dollars (remove-duplicates
+		     (remove-if-not #'dollar-symbol-p
+				    (flatten then))))
+	   (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+		    0)))
+      `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+	 (declare (ignorable ,g!matches ,g!captures))
+	 (let ((,g!captures-len (length ,g!captures)))
+	   (declare (ignorable ,g!captures-len))
+	   (symbol-macrolet ,(mapcar #`(,(symb "$" a1)
+					 (if (< ,g!captures-len ,a1)
+					     (error "Too few matchs: ~a unbound." ,(mkstr "$" a1))
+					     (aref ,g!captures ,(1- a1))))
+				     (loop for i from 1 to top collect i))
+	     (if ,g!matches
+		 ,then
+		 ,else)))))}
+
 
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)
-     (progn ,@forms)))
+	     (progn ,@forms)))
 
 ;; EOF
