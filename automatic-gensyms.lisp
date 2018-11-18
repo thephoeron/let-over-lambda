@@ -150,22 +150,22 @@
 		    syms)
 	       ,@body))))))
   #+sbcl
-  (set-dispatch-macro-character #\# #\g #'defmacro/g!-reader))
-#+sbcl
-(defun defmacro!-reader (stream char numarg)
-  (declare (ignore char numarg))
-  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	 (code (read-from-string str nil))
-	 (atoms (read-atoms str))
-	 (os (remove-if-not #'o!-symbol-p (remove-duplicates atoms)))	   
-	 (gs (mapcar #'o!-symbol-to-g!-symbol os))
-	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
-					  (remove-if-not #'g!-symbol-p atoms))
-				  :test #'(lambda (x y)
-					    (string-equal (symbol-name x)
-							  (symbol-name y))))))
-    (let ((body (cddr code)))
-      (multiple-value-bind (body declarations docstring)
+  (set-dispatch-macro-character #\# #\g #'defmacro/g!-reader)
+  #+sbcl
+  (defun defmacro!-reader (stream char numarg)
+    (declare (ignore char numarg))
+    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	   (code (read-from-string str nil))
+	   (atoms (read-atoms str))
+	   (os (remove-if-not #'o!-symbol-p (remove-duplicates atoms)))	   
+	   (gs (mapcar #'o!-symbol-to-g!-symbol os))
+	   (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
+					    (remove-if-not #'g!-symbol-p atoms))
+				    :test #'(lambda (x y)
+					      (string-equal (symbol-name x)
+							    (symbol-name y))))))
+      (let ((body (cddr code)))
+	(multiple-value-bind (body declarations docstring)
 	    (parse-body body :documentation t)
 	  `(defmacro ,(car code) ,(cadr code)
 	     ,@(when docstring
@@ -179,15 +179,43 @@
 		    syms)
 	       `(let ,(mapcar #'list (list ,@gs) (list ,@os))
 		  ,(progn ,@body))))))))
-#+sbcl
-(set-dispatch-macro-character #\# #\d #'defmacro!-reader)
-    ;; (multiple-value-bind (body declarations docstring)
-    ;; 	  (parse-body body :documentation t)
-    ;; (princ `#g{,name ,args
-    ;;            ,@(when docstring
-    ;; 	       (list docstring))
-    ;; 	   ,@declarations
-    ;; 	   `(let ,(mapcar #'list ',gs (list ,@os))
-    ;; 	     (progn ,',body))})
-    ;;	)
+  #+sbcl
+  (set-dispatch-macro-character #\# #\d #'defmacro!-reader)
+  ;; (multiple-value-bind (body declarations docstring)
+  ;; 	  (parse-body body :documentation t)
+  ;; (princ `#g{,name ,args
+  ;;            ,@(when docstring
+  ;; 	       (list docstring))
+  ;; 	   ,@declarations
+  ;; 	   `(let ,(mapcar #'list ',gs (list ,@os))
+  ;; 	     (progn ,',body))})
+  ;;	)
 
+  )
+
+  #+sbcl
+(defun defun!-reader (stream char numarg)
+  (declare (ignore char numarg))
+  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	 (code (read-from-string str nil))
+	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
+					    (remove-if-not #'g!-symbol-p (read-atoms str)))
+				    :test #'(lambda (x y)
+					      (string-equal (symbol-name x)
+							    (symbol-name y))))))
+    (let ((body (cddr code)))
+      (multiple-value-bind (body declarations docstring)
+	  (parse-body body :documentation t)
+	`(defun ,(car code) ,(cadr code)
+	   ,@(when docstring
+	       (list docstring))
+	   ,@declarations
+	   (let ,(mapcar
+		  (lambda (s)
+		    `(,s (gensym ,(subseq
+				   (symbol-name s)
+				   2))))
+		  syms)
+	     ,@body))))))
+#+sbcl
+(set-dispatch-macro-character #\# #\n #'defun!-reader)
