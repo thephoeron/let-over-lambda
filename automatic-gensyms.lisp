@@ -126,32 +126,6 @@
 	  (read-to-string stream terminating-char (push-on ch acc))
 	  (coerce acc 'string))))
   #+sbcl
-  (defun defmacro/g!-reader (stream char numarg)
-    (declare (ignore char numarg))
-    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	   (code (read-from-string str nil))
-	   (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
-					    (remove-if-not #'g!-symbol-p (read-atoms str)))
-				    :test #'(lambda (x y)
-					      (string-equal (symbol-name x)
-							    (symbol-name y))))))
-      (let ((body (cddr code)))
-	(multiple-value-bind (body declarations docstring)
-	    (parse-body body :documentation t)
-	  `(defmacro ,(car code) ,(cadr code)
-	     ,@(when docstring
-		 (list docstring))
-	     ,@declarations
-	     (let ,(mapcar
-		    (lambda (s)
-		      `(,s (gensym ,(subseq
-				     (symbol-name s)
-				     2))))
-		    syms)
-	       ,@body))))))
-  #+sbcl
-  (set-dispatch-macro-character #\# #\g #'defmacro/g!-reader)
-  #+sbcl
   (defun defmacro!-reader (stream char numarg)
     (declare (ignore char numarg))
     (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
@@ -193,9 +167,8 @@
 
   )
 
-  #+sbcl
-(defun defun!-reader (stream char numarg)
-  (declare (ignore char numarg))
+#+sbcl
+(defun make-autogensym-reader (form stream)
   (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
 	 (code (read-from-string str nil))
 	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
@@ -206,7 +179,7 @@
     (let ((body (cddr code)))
       (multiple-value-bind (body declarations docstring)
 	  (parse-body body :documentation t)
-	`(defun ,(car code) ,(cadr code)
+	`(,form ,(car code) ,(cadr code)
 	   ,@(when docstring
 	       (list docstring))
 	   ,@declarations
@@ -218,4 +191,10 @@
 		  syms)
 	     ,@body))))))
 #+sbcl
-(set-dispatch-macro-character #\# #\n #'defun!-reader)
+(set-dispatch-macro-character #\# #\g #'(lambda (stream char numarg)
+					  (declare (ignore char numarg))
+					  (make-autogensym-reader 'defmacro stream)))
+#+sbcl
+(set-dispatch-macro-character #\# #\n #'(lambda (stream char numarg)
+						(declare (ignore char numarg))
+						(make-autogensym-reader 'defun stream)))
