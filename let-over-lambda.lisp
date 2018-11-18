@@ -211,7 +211,7 @@
 	  ,(car ,g!args)
 	  ,',g!str
 	  ,(cadr ,g!args)))}
-#+cl-ppcre
+#+(and cl-ppcre (not sbcl))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun |#~-reader| (stream sub-char numarg)
     (declare (ignore sub-char numarg))
@@ -234,7 +234,7 @@
                           2)))
         (t (error "Unknown #~~ mode character"))))))
 
- #+cl-ppcre (set-dispatch-macro-character #\# #\~ #'|#~-reader|)
+#+(and cl-ppcre (not sbcl)) (set-dispatch-macro-character #\# #\~ #'|#~-reader|)
 #-sbcl
 (defmacro! dlambda (&rest ds)
   `(lambda (&rest ,g!args)
@@ -595,7 +595,7 @@
 ;; 		 ,then
 ;; 		 ,else)))))}
 
-
+#-sbcl
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)
 	     (progn ,@forms)))
