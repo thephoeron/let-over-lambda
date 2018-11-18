@@ -82,7 +82,7 @@
             ,(progn ,@body))))))
 ;; See SBCL defmacro! in automatic-gensyms.lisp
 
-(defmacro defun! (name args &body body)
+#-sbcl(defmacro defun! (name args &body body)
   (let ((syms (remove-duplicates
                (remove-if-not #'g!-symbol-p
                               (flatten body)))))

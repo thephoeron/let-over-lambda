@@ -16,11 +16,11 @@
            #:fact
            #:choose
            #:g!-symbol-p
-           #:defmacro/g!
+	   #-sbcl #:defmacro/g!
            #:o!-symbol-p
            #:o!-symbol-to-g!-symbol
-           #:defmacro!
-           #:defun!
+           #-sbcl #:defmacro!
+           #-sbcl #:defun!
            #:|#"-reader|
            #:segment-reader
            #:match-mode-ppcre-lambda-form

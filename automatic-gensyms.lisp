@@ -151,7 +151,6 @@
 	       ,@body))))))
   #+sbcl
   (set-dispatch-macro-character #\# #\g #'defmacro/g!-reader))
-#g{listq (&rest list) `(mapcar #'(lambda (,g!x) (list 'quote ,g!x)) ',list)}
 #+sbcl
 (defun defmacro!-reader (stream char numarg)
   (declare (ignore char numarg))
@@ -165,24 +164,21 @@
 				  :test #'(lambda (x y)
 					    (string-equal (symbol-name x)
 							  (symbol-name y))))))
-    (mapcar #'print (list str code os gs))
-    (let ((name (car code))
-	  (args (cadr code))
-	  (body (cddr code)))
+    (let ((body (cddr code)))
       (multiple-value-bind (body declarations docstring)
 	    (parse-body body :documentation t)
-	  (princ `(defmacro ,name ,args
-	      ,@(when docstring
-		  (list docstring))
-	      ,@declarations
-	      (let ,(mapcar
-		     (lambda (s)
-		       `(,s (gensym ,(subseq
-				      (symbol-name s)
-				      2))))
-		     syms)
-		`(let ,(mapcar #'list (list ,@gs) (list ,@os))
-		   ,(progn ,@body)))))))))
+	  `(defmacro ,(car code) ,(cadr code)
+	     ,@(when docstring
+		 (list docstring))
+	     ,@declarations
+	     (let ,(mapcar
+		    (lambda (s)
+		      `(,s (gensym ,(subseq
+				     (symbol-name s)
+				     2))))
+		    syms)
+	       `(let ,(mapcar #'list (list ,@gs) (list ,@os))
+		  ,(progn ,@body))))))))
 #+sbcl
 (set-dispatch-macro-character #\# #\d #'defmacro!-reader)
     ;; (multiple-value-bind (body declarations docstring)

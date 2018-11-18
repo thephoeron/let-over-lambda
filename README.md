@@ -17,7 +17,18 @@ Read more about the book and code at: http://letoverlambda.com
 ## News &amp; Updates
 ##### 16/11/2018
 
-Reader macros for `defmacro!` (`#g{...}`)and `defmacro/g!` (`#d{...}`) added by [Spenser Truex](https://github.com/equwal/). SBCL now can have functionality of them thanks to this.
+Reader macros for `defmacro!` (`#d{...}`)and `defmacro/g!` (`#g{...}`) added by [Spenser Truex](https://github.com/equwal/). Intended for use only on SBCL which doesn't support them. Use `#g` like this:
+```
+#g{listq (&rest list) 
+    (mapcar #'(lambda (,g!x) (list 'quote ,g!x)) ',list)}
+```
+and use `#d` like this:
+```
+#d{square (o!x)
+    `(* ,g!x ,g!x)}
+```
+Any escape character can be used `#d<code>` `#d|code|`. Watch out though since no other reader macros work inside of the code, incluing strings quoted with `""`.
+
 
 ##### 3/19/2015
 
