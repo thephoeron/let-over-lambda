@@ -37,95 +37,96 @@
 
 (in-package #:let-over-lambda)
 
-(eval-when (:compile-toplevel :execute)
-  (defun g!-symbol-p (s)
-    (and (symbolp s)
-	 (> (length (symbol-name s)) 2)
-	 (or (string= (symbol-name s)
-		      "G!"
-		      :start1 0
-		      :end1 2)
-	     #+sbcl
-	     (string= (symbol-name s)
-		      ",G!"
-		      :start1 0
-		      :end1 3))))
-  (defun flatten (x)
-    (labels ((rec (x acc)
-	       (cond ((null x) acc)
-		     ((atom x) (cons x acc))
-		     (t (rec
-			 (car x)
-			 (rec (cdr x) acc))))))
-      (rec x nil)))
-  (defun mkstr (&rest args)
-    (with-output-to-string (s)
-      (dolist (a args) (princ a s))))
-  (defun symb (&rest args)
-    (values (intern (apply #'mkstr args))))
-  (defun o!-symbol-p (s)
-    (and (symbolp s)
-	 (> (length (symbol-name s)) 2)
-	 (string= (symbol-name s)
-		  "O!"
-		  :start1 0
-		  :end1 2)))
 
-  (defun o!-symbol-to-g!-symbol (s)
-    (intern (concatenate 'string
-			 "G!"
-			 (subseq (remove #\, (symbol-name s)) 2))))
-  #+sbcl
-  (defun prepare (str)
-    (concatenate 'string (string #\() str (string #\))))
-  #+sbcl
-  (defun enclose (char)
-    (cond ((char= char #\{) #\})
-	  ((char= char #\[) #\[)
-	  ((char= char #\() #\))
-	  ((char= char #\<) #\>)
-	  (t char)))
-  #+sbcl
-  (defun termp (opening tester)
-    (char= (enclose opening) tester))
-  #+sbcl
-  (defun backquote-kludge (str)
-    (remove #\` str))
-  #+sbcl
-  (defmacro once-only ((&rest names) &body body)
-    "A macro-writing utility for evaluating code only once."
-    (let ((gensyms (loop for n in names collect (gensym))))
-      `(let (,@(loop for g in gensyms collect `(,g (gensym))))
-	 `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
-	    ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
-	       ,@body)))))
-  #+sbcl
-  (defmacro with-gensyms (symbols &body body)
-    "Create gensyms for those symbols."
-    `(let (,@(mapcar #'(lambda (sym)
-			 `(,sym ',(gensym))) symbols))
-       ,@body))
-  #+sbcl
-  (defun push-on (elt stack)
-    (vector-push-extend elt stack) stack)
-  #+sbcl
-  (defmacro with-macro-fn (char new-fn &body body)
-    (once-only (char new-fn)
-      (with-gensyms (old)
-	`(let ((,old (get-macro-character ,char)))
-	   (progn (set-macro-character ,char ,new-fn)
-		  (prog1 (progn ,@body) (set-macro-character ,char ,old)))))))
-  #+sbcl
-  (defun read-atoms (str)
-    (with-macro-fn #\, nil
-      (flatten (read-from-string (backquote-kludge (prepare str)) nil nil))))
-  #+sbcl
-  (defun read-to-string (stream terminating-char &optional (acc (make-array 0 :adjustable t :fill-pointer 0)))
-    (let ((ch (read-char stream nil nil)))
-      (if (and ch (not (char= terminating-char ch)))
-	  (read-to-string stream terminating-char (push-on ch acc))
-	  (coerce acc 'string))))
-  #+sbcl
+(defun g!-symbol-p (s)
+  (and (symbolp s)
+       (> (length (symbol-name s)) 2)
+       (or (string= (symbol-name s)
+		    "G!"
+		    :start1 0
+		    :end1 2)
+	   #+sbcl
+	   (string= (symbol-name s)
+		    ",G!"
+		    :start1 0
+		    :end1 3))))
+(defun flatten (x)
+  (labels ((rec (x acc)
+	     (cond ((null x) acc)
+		   ((atom x) (cons x acc))
+		   (t (rec
+		       (car x)
+		       (rec (cdr x) acc))))))
+    (rec x nil)))
+(defun mkstr (&rest args)
+  (with-output-to-string (s)
+    (dolist (a args) (princ a s))))
+(defun symb (&rest args)
+  (values (intern (apply #'mkstr args))))
+(defun o!-symbol-p (s)
+  (and (symbolp s)
+       (> (length (symbol-name s)) 2)
+       (string= (symbol-name s)
+		"O!"
+		:start1 0
+		:end1 2)))
+
+(defun o!-symbol-to-g!-symbol (s)
+  (intern (concatenate 'string
+		       "G!"
+		       (subseq (remove #\, (symbol-name s)) 2))))
+#+sbcl
+(defun prepare (str)
+  (concatenate 'string (string #\() str (string #\))))
+#+sbcl
+(defun enclose (char)
+  (cond ((char= char #\{) #\})
+	((char= char #\[) #\[)
+	((char= char #\() #\))
+	((char= char #\<) #\>)
+	(t char)))
+#+sbcl
+(defun termp (opening tester)
+  (char= (enclose opening) tester))
+#+sbcl
+(defun backquote-kludge (str)
+  (remove #\` str))
+#+sbcl
+(defmacro once-only ((&rest names) &body body)
+  "A macro-writing utility for evaluating code only once."
+  (let ((gensyms (loop for n in names collect (gensym))))
+    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
+       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+	  ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+	     ,@body)))))
+#+sbcl
+(defmacro with-gensyms (symbols &body body)
+  "Create gensyms for those symbols."
+  `(let (,@(mapcar #'(lambda (sym)
+		       `(,sym ',(gensym))) symbols))
+     ,@body))
+#+sbcl
+(defun push-on (elt stack)
+  (vector-push-extend elt stack) stack)
+#+sbcl
+(defmacro with-macro-fn (char new-fn &body body)
+  (once-only (char new-fn)
+    (with-gensyms (old)
+      `(let ((,old (get-macro-character ,char)))
+	 (progn (set-macro-character ,char ,new-fn)
+		(prog1 (progn ,@body) (set-macro-character ,char ,old)))))))
+#+sbcl
+(defun read-atoms (str)
+  (with-macro-fn #\, nil
+    (flatten (read-from-string (backquote-kludge (prepare str)) nil nil))))
+#+sbcl
+(defun read-to-string (stream terminating-char &optional (acc (make-array 0 :adjustable t :fill-pointer 0)))
+  (let ((ch (read-char stream nil nil)))
+    (if (and ch (not (char= terminating-char ch)))
+	(read-to-string stream terminating-char (push-on ch acc))
+	(coerce acc 'string))))
+#+sbcl
+(eval-when (:compile-toplevel :load-toplevel :execute)
   (defun defmacro!-reader (stream char numarg)
     (declare (ignore char numarg))
     (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
@@ -152,49 +153,38 @@
 				     2))))
 		    syms)
 	       `(let ,(mapcar #'list (list ,@gs) (list ,@os))
-		  ,(progn ,@body))))))))
-  #+sbcl
-  (set-dispatch-macro-character #\# #\d #'defmacro!-reader)
-  ;; (multiple-value-bind (body declarations docstring)
-  ;; 	  (parse-body body :documentation t)
-  ;; (princ `#g{,name ,args
-  ;;            ,@(when docstring
-  ;; 	       (list docstring))
-  ;; 	   ,@declarations
-  ;; 	   `(let ,(mapcar #'list ',gs (list ,@os))
-  ;; 	     (progn ,',body))})
-  ;;	)
-
-  )
-
+		  ,(progn ,@body)))))))))
 #+sbcl
-(defun make-autogensym-reader (form stream)
-  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	 (code (read-from-string str nil))
-	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun make-autogensym-reader (form stream)
+    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	   (code (read-from-string str nil))
+	   (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
 					    (remove-if-not #'g!-symbol-p (read-atoms str)))
 				    :test #'(lambda (x y)
 					      (string-equal (symbol-name x)
 							    (symbol-name y))))))
-    (let ((body (cddr code)))
-      (multiple-value-bind (body declarations docstring)
-	  (parse-body body :documentation t)
-	`(,form ,(car code) ,(cadr code)
-	   ,@(when docstring
-	       (list docstring))
-	   ,@declarations
-	   (let ,(mapcar
-		  (lambda (s)
-		    `(,s (gensym ,(subseq
-				   (symbol-name s)
-				   2))))
-		  syms)
-	     ,@body))))))
+      (let ((body (cddr code)))
+	(multiple-value-bind (body declarations docstring)
+	    (parse-body body :documentation t)
+	  `(,form ,(car code) ,(cadr code)
+		  ,@(when docstring
+		      (list docstring))
+		  ,@declarations
+		  (let ,(mapcar
+			 (lambda (s)
+			   `(,s (gensym ,(subseq
+					  (symbol-name s)
+					  2))))
+			 syms)
+		    ,@body)))))))
 #+sbcl
 (set-dispatch-macro-character #\# #\g #'(lambda (stream char numarg)
 					  (declare (ignore char numarg))
 					  (make-autogensym-reader 'defmacro stream)))
 #+sbcl
 (set-dispatch-macro-character #\# #\n #'(lambda (stream char numarg)
-						(declare (ignore char numarg))
-						(make-autogensym-reader 'defun stream)))
+					  (declare (ignore char numarg))
+					  (make-autogensym-reader 'defun stream)))
+#+sbcl
+(set-dispatch-macro-character #\# #\d #'defmacro!-reader)
