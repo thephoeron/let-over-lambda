@@ -54,10 +54,8 @@
   (defun mkstr (&rest args)
     (with-output-to-string (s)
       (dolist (a args) (princ a s))))
-
   (defun symb (&rest args)
     (values (intern (apply #'mkstr args))))
-
   (defun flatten (x)
     (labels ((rec (x acc)
                   (cond ((null x) acc)
@@ -93,7 +91,8 @@
     (symb "G!"
           (subseq (symbol-name s) 2))))
 
-#-sbcl(defmacro defmacro/g! (name args &rest body)
+#-sbcl
+(defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
                (remove-if-not #'g!-symbol-p
                               (flatten body)))))
@@ -110,18 +109,19 @@
                                  2))))
                 syms)
            ,@body)))))
-
-#-sbcl(defmacro defmacro! (name args &rest body)
+#-sbcl
+(defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p (flatten args)))
          (gs (mapcar #'o!-symbol-to-g!-symbol os)))
     (multiple-value-bind (body declarations docstring)
         (parse-body body :documentation t)
       `(defmacro/g! ,name ,args
          ,@(when docstring
-            (list docstring))
+	     (list docstring))
          ,@declarations
          `(let ,(mapcar #'list (list ,@gs) (list ,@os))
             ,(progn ,@body))))))
+;; See SBCL defmacro! in automatic-gensyms.lisp
 
 (defmacro defun! (name args &body body)
   (let ((syms (remove-duplicates
