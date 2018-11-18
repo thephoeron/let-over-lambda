@@ -1,3 +1,11 @@
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.lisp
+
+;;;; Copyleft Spenser Truex "Equwal" 2018
+;;;; This file for automatic gensym reader macros on SBCL, since SBCL doesn't support it otherwise.
+
+;;;; TODO:
+;;;; Fix backquote-kludge to not silently remove backquotes from strings.
+
 (in-package #:let-over-lambda)
 (defun prepare (str)
   (concatenate 'string (string #\() str (string #\))))
@@ -39,24 +47,24 @@
     (if (and ch (not (char= terminating-char ch)))
 	 (read-to-string stream terminating-char (push-on ch acc))
 	 (concatenate 'string acc))))
-(defun defmacro/g!-reader (stream char numarg)
-  (declare (ignore char numarg))
-  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	 (code (read-from-string str nil))
-	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
-					  (remove-if-not #'g!-symbol-p (read-atoms str)))
-				  :test #'(lambda (x y)
-					    (string-equal (symbol-name x)
-							  (symbol-name y))))))
-    ;; a good thing.
-    `(defmacro ,(car code) ,(cadr code)
-       (let (,@(loop for x in syms
-		  collect (list x '(gensym))))
-	 ,@(cddr code)))))
-;; (defun defmacro!-reader (stream char numarg)
-;;   (declare (ignore char numarg))
-  
-;;   )
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun defmacro/g!-reader (stream char numarg)
+    (declare (ignore char numarg))
+    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	   (code (read-from-string str nil))
+	   (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
+					    (remove-if-not #'g!-symbol-p (read-atoms str)))
+				    :test #'(lambda (x y)
+					      (string-equal (symbol-name x)
+							    (symbol-name y))))))
+      ;; a good thing.
+      `(defmacro ,(car code) ,(cadr code)
+	 (let (,@(loop for x in syms
+		    collect (list x '(gensym))))
+	   ,@(cddr code))))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+ (defun defmacro!-reader (stream char numarg)
+   (declare (ignore char numarg))))
 ;; Expansion
 ;; (defmacro name (y)
 ;;   (let ((g!x (gensym)))
