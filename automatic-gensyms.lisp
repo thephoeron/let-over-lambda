@@ -62,23 +62,19 @@
       (let ((name (car code))
 	    (args (cadr code))
 	    (body (cddr code)))
-	`(defmacro ,name ,args
-	   (let (,@(loop for x in syms
-		      collect (list x '(gensym))))
-	     ,@body))))))
-  ;; (multiple-value-bind (body declarations docstring)
-  ;;     (parse-body ,body :documentation t)
-  ;;   `(defmacro ,name ,args
-  ;;      ,@(when docstring
-  ;; 	   (list docstring))
-  ;;      ,@declarations
-  ;;      (let ,(mapcar
-  ;; 	      (lambda (s)
-  ;; 		`(,s (gensym ,(subseq
-  ;; 			       (symbol-name s)
-  ;; 			       2))))
-  ;; 	      ,',syms)
-  ;; ,@body))))))))
+	(multiple-value-bind (body declarations docstring)
+	    (parse-body body :documentation t)
+	  `(defmacro ,name ,args
+	     ,@(when docstring
+		 (list docstring))
+	     ,@declarations
+	     (let ,(mapcar
+		    (lambda (s)
+		      `(,s (gensym ,(subseq
+				     (symbol-name s)
+				     2))))
+		    syms)
+	       ,@body)))))))
 #+sbcl
 (eval-when (:compile-toplevel :execute :load-toplevel)
   (defmacro defmacro! (name args &rest body)
