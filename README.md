@@ -1,5 +1,3 @@
-This version clobbers the global readtable. If you want to type `(named-readtables:in-readtable lol:lol-syntax)` at the top of every file which
-uses the reader macros then go to (https://github.com/thephoeron/let-over-lambda)
 
 # LET-OVER-LAMBDA
 
