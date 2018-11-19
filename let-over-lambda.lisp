@@ -1,7 +1,7 @@
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.lisp
 
 (in-package #:let-over-lambda)
-
+(in-readtable lol-syntax)
 ;; Antiweb (C) Doug Hoyte
 
 ;; This is a "production" version of LOL with bug-fixes

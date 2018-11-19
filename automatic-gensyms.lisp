@@ -178,13 +178,12 @@
 					  2))))
 			 syms)
 		    ,@body)))))))
-#+sbcl
-(set-dispatch-macro-character #\# #\g #'(lambda (stream char numarg)
-					  (declare (ignore char numarg))
-					  (make-autogensym-reader 'defmacro stream)))
-#+sbcl
-(set-dispatch-macro-character #\# #\n #'(lambda (stream char numarg)
+(defreadtable lol-syntax
+  (:merge :standard)
+  (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
+				    (declare (ignore char numarg))
+				    (make-autogensym-reader 'defmacro stream)))
+  (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
 					  (declare (ignore char numarg))
 					  (make-autogensym-reader 'defun stream)))
-#+sbcl
-(set-dispatch-macro-character #\# #\d #'defmacro!-reader)
+  (:dispatch-macro-char #\# #\d #'defmacro!-reader))
