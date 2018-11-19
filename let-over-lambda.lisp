@@ -137,7 +137,6 @@
                                 (setq state 'normal)))))))))
      (coerce (nreverse chars) 'string))))
 
-(set-dispatch-macro-character #\# #\" #'|#"-reader|)
 
 ; This version is from Martin Dirichs
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -167,7 +166,6 @@
             (nthcdr (length pattern) output))
            'string))))))
 
- (set-dispatch-macro-character #\# #\> #'|#>-reader|)
 
 (defun segment-reader (stream ch n)
   (if (> n 0)
@@ -234,7 +232,6 @@
                           2)))
         (t (error "Unknown #~~ mode character"))))))
 
-#+(and cl-ppcre (not sbcl)) (set-dispatch-macro-character #\# #\~ #'|#~-reader|)
 #-sbcl
 (defmacro! dlambda (&rest ds)
   `(lambda (&rest ,g!args)
@@ -289,9 +286,22 @@
     (unless (<= numarg 3)
       (error "Bad value for #f: ~a" numarg))
     `(declare (optimize (speed ,numarg)
-                        (safety ,(- 3 numarg)))))
-  (set-dispatch-macro-character #\# #\` #'|#`-reader|)
-  (set-dispatch-macro-character #\# #\f #'|#f-reader|))
+                        (safety ,(- 3 numarg))))))
+(defreadtable lol-syntax
+  (:merge :standard)
+  #+(and cl-ppcre (not sbcl))
+  (:dispatch-macro-char #\# #\~ #'|#~-reader|)
+  (:dispatch-macro-char #\# #\> #'|#>-reader|)
+  (:dispatch-macro-char #\# #\" #'|#"-reader|)
+  (:dispatch-macro-char #\# #\` #'|#`-reader|)
+  (:dispatch-macro-char #\# #\f #'|#f-reader|)
+  (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
+				    (declare (ignore char numarg))
+				    (make-autogensym-reader 'defmacro stream)))
+  (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
+					  (declare (ignore char numarg))
+					  (make-autogensym-reader 'defun stream)))
+  (:dispatch-macro-char #\# #\d #'defmacro!-reader))
 
 #-sbcl
 (defmacro! nlet-tail (n letargs &body body)

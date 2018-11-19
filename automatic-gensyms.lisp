@@ -179,12 +179,3 @@
 					  2))))
 			 syms)
 		    ,@body)))))))
-(defreadtable lol-syntax
-  (:merge :standard)
-  (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
-				    (declare (ignore char numarg))
-				    (make-autogensym-reader 'defmacro stream)))
-  (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
-					  (declare (ignore char numarg))
-					  (make-autogensym-reader 'defun stream)))
-  (:dispatch-macro-char #\# #\d #'defmacro!-reader))
