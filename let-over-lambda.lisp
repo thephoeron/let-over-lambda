@@ -263,12 +263,15 @@
     (:dispatch-macro-char #\# #\~ #'|#~-reader|)
     (:dispatch-macro-char #\# #\` #'|#`-reader|)
     (:dispatch-macro-char #\# #\f #'|#f-reader|)
+    #+sbcl
     (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
 				      (declare (ignore char numarg))
 				      (make-autogensym-reader 'defmacro stream)))
+    #+sbcl
     (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
 				      (declare (ignore char numarg))
 				      (make-autogensym-reader 'defun stream)))
+    #+sbcl
     (:dispatch-macro-char #\# #\d #'defmacro!-reader)))
 (in-readtable lol-syntax)
 #+(and cl-ppcre sbcl)
