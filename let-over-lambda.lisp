@@ -184,15 +184,17 @@
           (car ,g!args)
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
        ,',g!str)))
-
-;; #+(and cl-ppcre sbcl)
-;; #d{match-mode-ppcre-lambda-form (o!args o!mods)
-;;      ``(lambda (,',g!str)
-;; 	 (ppcre:scan-to-strings
-;; 	  ,(if (zerop (length ,g!mods))
-;; 	       (car ,g!args)
-;; 	       (format nil "(?~a)~a" ,g!mods (car ,g!args)))
-;; 	  ,',g!str))}
+#+(and cl-ppcre sbcl)
+(defun format-aux (mods carargs)
+  (format nil "(?~a)~a"))
+#+(and cl-ppcre sbcl)
+#d{match-mode-ppcre-lambda-form (o!args o!mods)
+     ``(lambda (,',g!str)
+	 (ppcre:scan-to-strings
+	  ,(if (zerop (length ,g!mods))
+	       (car ,g!args)
+	       (format-aux ,g!mods (car ,g!args)))
+	  ,',g!str))}
 
 #+(and cl-ppcre (not sbcl))
 (defmacro! subst-mode-ppcre-lambda-form (o!args)
@@ -543,17 +545,18 @@
                  (setf #1# ,g!b
                        #2# ,g!a)))
            (build-batcher-sn (length places))))))
-;; #+sbcl
-;; #d{sortf (comparator &rest places)
-;;     (if places
-;; 	`(tagbody
-;; 	    ,@(mapcar
-;; 	       #`(let ((,g!a #1=,(nth (car a1) places))
-;; 		       (,g!b #2=,(nth (cadr a1) places)))
-;; 		   (if (,comparator ,g!b ,g!a)
-;; 		       (setf #1# ,g!b
-;; 			     #2# ,g!a)))
-;; 	       (build-batcher-sn (length places)))))}
+
+#+sbcl
+#d{sortf (comparator &rest places)
+    (if places
+	`(tagbody
+	    ,@(mapcar
+	       #`(let ((,g!a #1=,(nth (car a1) places))
+		       (,g!b #2=,(nth (cadr a1) places)))
+		   (if (,comparator ,g!b ,g!a)
+		       (setf #1# ,g!b
+			     #2# ,g!a)))
+	       (build-batcher-sn (length places)))))}
 
 ;;;;;; NEW CODE FOR ANTIWEB
 #+cl-ppcre
@@ -585,27 +588,29 @@
            (if ,g!matches
                ,then
                ,else))))))
+#+sbcl
+(defun error-aux (a1)
+  (error "Too few matchs: ~a unbound." (mkstr "$" a1)))
+#+sbcl
+#d{if-match ((match-regex str) then &optional else)
+    (let* ((dollars (remove-duplicates
+		     (remove-if-not #'dollar-symbol-p
+				    (flatten then))))
+	   (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+		    0)))
+      `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+	 (declare (ignorable ,g!matches ,g!captures))
+	 (let ((,g!captures-len (length ,g!captures)))
+	   (declare (ignorable ,g!captures-len))
+	   (symbol-macrolet ,(mapcar #`(,(symb #\$ a1)
+					 (if (< ,g!captures-len ,a1)
+					     (error-aux ,ai)
+					     (aref ,g!captures ,(1- a1))))
+				     (loop for i from 1 to top collect i))
+	     (if ,g!matches
+		 ,then
+		 ,else)))))}
 
-;; #d{if-match ((match-regex str) then &optional else)
-;;     (let* ((dollars (remove-duplicates
-;; 		     (remove-if-not #'dollar-symbol-p
-;; 				    (flatten then))))
-;; 	   (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
-;; 		    0)))
-;;       `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
-;; 	 (declare (ignorable ,g!matches ,g!captures))
-;; 	 (let ((,g!captures-len (length ,g!captures)))
-;; 	   (declare (ignorable ,g!captures-len))
-;; 	   (symbol-macrolet ,(mapcar #`(,(symb "$" a1)
-;; 					 (if (< ,g!captures-len ,a1)
-;; 					     (error "Too few matchs: ~a unbound." ,(mkstr "$" a1))
-;; 					     (aref ,g!captures ,(1- a1))))
-;; 				     (loop for i from 1 to top collect i))
-;; 	     (if ,g!matches
-;; 		 ,then
-;; 		 ,else)))))}
-
-#-sbcl
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)
 	     (progn ,@forms)))
