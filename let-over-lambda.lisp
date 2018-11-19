@@ -1,7 +1,6 @@
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.lisp
 
 (in-package #:let-over-lambda)
-(in-readtable lol-syntax)
 ;; Antiweb (C) Doug Hoyte
 
 ;; This is a "production" version of LOL with bug-fixes
@@ -202,13 +201,6 @@
        ,(car ,g!args)
        ,',g!str
        ,(cadr ,g!args))))
-#+(and cl-ppcre sbcl)
-#d{subst-mode-ppcre-lambda-form (o!args)
-     ``(lambda (,',g!str)
-	 (cl-ppcre:regex-replace-all
-	  ,(car ,g!args)
-	  ,',g!str
-	  ,(cadr ,g!args)))}
 #+(and cl-ppcre (not sbcl))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun |#~-reader| (stream sub-char numarg)
@@ -246,20 +238,6 @@
                          g!args
                          `(cdr ,g!args)))))
            ds))))
-#+sbcl
-#d{dlambda (&rest ds)
-       `(lambda (&rest ,g!args)
-	  (case (car ,g!args)
-	    ,@(mapcar
-	       (lambda (d)
-		 `(,(if (eq t (car d))
-			t
-			(list (car d)))
-		    (apply (lambda ,@(cdr d))
-			   ,(if (eq t (car d))
-				g!args
-				`(cdr ,g!args)))))
-	       ds)))}
 
 ;; Graham's alambda
 (defmacro alambda (parms &body body)
@@ -286,22 +264,44 @@
     (unless (<= numarg 3)
       (error "Bad value for #f: ~a" numarg))
     `(declare (optimize (speed ,numarg)
-                        (safety ,(- 3 numarg))))))
-(defreadtable lol-syntax
-  (:merge :standard)
-  #+(and cl-ppcre (not sbcl))
-  (:dispatch-macro-char #\# #\~ #'|#~-reader|)
-  (:dispatch-macro-char #\# #\> #'|#>-reader|)
-  (:dispatch-macro-char #\# #\" #'|#"-reader|)
-  (:dispatch-macro-char #\# #\` #'|#`-reader|)
-  (:dispatch-macro-char #\# #\f #'|#f-reader|)
-  (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
-				    (declare (ignore char numarg))
-				    (make-autogensym-reader 'defmacro stream)))
-  (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
-					  (declare (ignore char numarg))
-					  (make-autogensym-reader 'defun stream)))
-  (:dispatch-macro-char #\# #\d #'defmacro!-reader))
+                        (safety ,(- 3 numarg)))))
+  (defreadtable lol-syntax
+    (:merge :standard)
+    (:dispatch-macro-char #\# #\" #'|#"-reader|)
+    (:dispatch-macro-char #\# #\> #'|#>-reader|)
+    #+(and cl-ppcre (not sbcl))
+    (:dispatch-macro-char #\# #\~ #'|#~-reader|)
+    (:dispatch-macro-char #\# #\` #'|#`-reader|)
+    (:dispatch-macro-char #\# #\f #'|#f-reader|)
+    (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
+				      (declare (ignore char numarg))
+				      (make-autogensym-reader 'defmacro stream)))
+    (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
+				      (declare (ignore char numarg))
+				      (make-autogensym-reader 'defun stream)))
+    (:dispatch-macro-char #\# #\d #'defmacro!-reader)))
+(in-readtable lol-syntax)
+#+(and cl-ppcre sbcl)
+#d{subst-mode-ppcre-lambda-form (o!args)
+     ``(lambda (,',g!str)
+	 (cl-ppcre:regex-replace-all
+	  ,(car ,g!args)
+	  ,',g!str
+	  ,(cadr ,g!args)))}
+#+sbcl
+#d{dlambda (&rest ds)
+       `(lambda (&rest ,g!args)
+	  (case (car ,g!args)
+	    ,@(mapcar
+	       (lambda (d)
+		 `(,(if (eq t (car d))
+			t
+			(list (car d)))
+		    (apply (lambda ,@(cdr d))
+			   ,(if (eq t (car d))
+				g!args
+				`(cdr ,g!args)))))
+	       ds)))}
 
 #-sbcl
 (defmacro! nlet-tail (n letargs &body body)
