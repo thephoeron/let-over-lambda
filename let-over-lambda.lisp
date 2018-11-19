@@ -137,7 +137,7 @@
                                 (setq state 'normal)))))))))
      (coerce (nreverse chars) 'string))))
 
- (set-dispatch-macro-character #\# #\" #'|#"-reader|)
+(set-dispatch-macro-character #\# #\" #'|#"-reader|)
 
 ; This version is from Martin Dirichs
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -533,17 +533,17 @@
                  (setf #1# ,g!b
                        #2# ,g!a)))
            (build-batcher-sn (length places))))))
-#+sbcl
-#d{sortf (comparator &rest places)
-    (if places
-	`(tagbody
-	    ,@(mapcar
-	       #`(let ((,g!a #1=,(nth (car a1) places))
-		       (,g!b #2=,(nth (cadr a1) places)))
-		   (if (,comparator ,g!b ,g!a)
-		       (setf #1# ,g!b
-			     #2# ,g!a)))
-	       (build-batcher-sn (length places)))))}
+;; #+sbcl
+;; #d{sortf (comparator &rest places)
+;;     (if places
+;; 	`(tagbody
+;; 	    ,@(mapcar
+;; 	       #`(let ((,g!a #1=,(nth (car a1) places))
+;; 		       (,g!b #2=,(nth (cadr a1) places)))
+;; 		   (if (,comparator ,g!b ,g!a)
+;; 		       (setf #1# ,g!b
+;; 			     #2# ,g!a)))
+;; 	       (build-batcher-sn (length places)))))}
 
 ;;;;;; NEW CODE FOR ANTIWEB
 #+cl-ppcre
