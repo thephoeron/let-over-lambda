@@ -184,18 +184,6 @@
           (car ,g!args)
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
        ,',g!str)))
-#+(and cl-ppcre sbcl)
-(defun format-aux (mods carargs)
-  (format nil "(?~a)~a"))
-#+(and cl-ppcre sbcl)
-(progn #d{match-mode-ppcre-lambda-form (o!args o!mods)
-           ``(lambda (,',g!str)
-	       (ppcre:scan-to-strings
-		,(if (zerop (length ,g!mods))
-		     (car ,g!args)
-		     (format-aux ,g!mods (car ,g!args)))
-		,',g!str))})
-
 #+(and cl-ppcre (not sbcl))
 (defmacro! subst-mode-ppcre-lambda-form (o!args)
  ``(lambda (,',g!str)
@@ -283,6 +271,17 @@
 				      (make-autogensym-reader 'defun stream)))
     (:dispatch-macro-char #\# #\d #'defmacro!-reader)))
 (in-readtable lol-syntax)
+#+(and cl-ppcre sbcl)
+(defun format-aux (mods carargs)
+  (format nil "(?~a)~a" mods carargs))
+#+(and cl-ppcre sbcl)
+(progn #d{match-mode-ppcre-lambda-form (o!args o!mods)
+           ``(lambda (,',g!str)
+	       (ppcre:scan-to-strings
+		,(if (zerop (length ,g!mods))
+		     (car ,g!args)
+		     (format-aux ,g!mods (car ,g!args)))
+		,',g!str))})
 #+(and cl-ppcre sbcl)
 (progn #d{subst-mode-ppcre-lambda-form (o!args)
            ``(lambda (,',g!str)
@@ -592,24 +591,25 @@
 (defun error-aux (a1)
   (error "Too few matchs: ~a unbound." (mkstr "$" a1)))
 #+sbcl
-(progn #d{if-match ((match-regex str) then &optional else)
-       (let* ((dollars (remove-duplicates
-			(remove-if-not #'dollar-symbol-p
-				       (flatten then))))
-	      (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
-		       0)))
-	 `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
-	    (declare (ignorable ,g!matches ,g!captures))
-	    (let ((,g!captures-len (length ,g!captures)))
-	      (declare (ignorable ,g!captures-len))
-	      (symbol-macrolet ,(mapcar #`(,(symb #\$ a1)
-					    (if (< ,g!captures-len ,a1)
-						(error-aux ,ai)
-						(aref ,g!captures ,(1- a1))))
-					(loop for i from 1 to top collect i))
-		(if ,g!matches
-		    ,then
-		    ,else)))))})
+(progn
+  #d{if-match ((match-regex str) then &optional else)
+      (let* ((dollars (remove-duplicates
+		       (remove-if-not #'dollar-symbol-p
+				      (flatten then))))
+	     (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+		      0)))
+	`(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+	   (declare (ignorable ,g!matches ,g!captures))
+	   (let ((,g!captures-len (length ,g!captures)))
+	     (declare (ignorable ,g!captures-len))
+	     (symbol-macrolet ,(mapcar #`(,(symb #\$ a1)
+					   (if (< ,g!captures-len ,a1)
+					       (error-aux ,ai)
+					       (aref ,g!captures ,(1- a1))))
+				       (loop for i from 1 to top collect i))
+	       (if ,g!matches
+		   ,then
+		   ,else)))))})
 
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)
