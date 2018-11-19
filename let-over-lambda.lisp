@@ -593,23 +593,24 @@
 #+sbcl
 (progn
   #d{if-match ((match-regex str) then &optional else)
-      (let* ((dollars (remove-duplicates
-		       (remove-if-not #'dollar-symbol-p
-				      (flatten then))))
-	     (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
-		      0)))
-	`(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
-	   (declare (ignorable ,g!matches ,g!captures))
-	   (let ((,g!captures-len (length ,g!captures)))
-	     (declare (ignorable ,g!captures-len))
-	     (symbol-macrolet ,(mapcar #`(,(symb #\$ a1)
-					   (if (< ,g!captures-len ,a1)
-					       (error-aux ,ai)
-					       (aref ,g!captures ,(1- a1))))
-				       (loop for i from 1 to top collect i))
-	       (if ,g!matches
-		   ,then
-		   ,else)))))})
+  (let* ((dollars (remove-duplicates
+		   (remove-if-not #'dollar-symbol-p
+				  (flatten then))))
+	 (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+		  0)))
+    `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+       (declare (ignorable ,g!matches ,g!captures))
+       (let ((,g!captures-len (length ,g!captures)))
+	 (declare (ignorable ,g!captures-len))
+	 (symbol-macrolet ,(mapcar (lambda (a1)
+				     `(,(symb #\$ a1)
+					(if (< ,g!captures-len ,a1)
+					    (error-aux ,a1)
+					    (aref ,g!captures ,(1- a1)))))
+				   (loop for i from 1 to top collect i))
+	   (if ,g!matches
+	       ,then
+	       ,else)))))})
 
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)
