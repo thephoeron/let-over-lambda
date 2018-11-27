@@ -23,7 +23,8 @@
                #:named-readtables)
   :components ((:file "package")
 	       (:file "automatic-gensyms")
-               (:file "let-over-lambda"))
+               (:file "let-over-lambda")
+	       (:file "ch8"))
   :in-order-to ((test-op (test-op let-over-lambda-test))))
 
 ;; EOF

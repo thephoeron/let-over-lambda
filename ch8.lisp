@@ -142,15 +142,16 @@
              (push (,a1 (pop pstack))
                    pstack))
          words)))
-(defmacro! forth-binary-word-definer (&rest words)
+#d{forth-binary-word-definer (&rest words)
   `(progn
      ,@(mapcar
-         #`(def-forth-prim ,a1 nil
-             (let ((,g!top (pop pstack)))
-               (push (,a1 (pop pstack)
-                          ,g!top)
-                     pstack)))
-         words)))
+	(lambda (a1)
+	  `(def-forth-prim ,a1 nil
+	    (let ((,g!top (pop pstack)))
+	      (push (,a1 (pop pstack)
+			 ,g!top)
+		    pstack))))
+         words))}
 (forth-unary-word-definer
   not car cdr cadr caddr cadddr
   oddp evenp)
