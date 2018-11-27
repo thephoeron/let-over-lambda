@@ -89,8 +89,58 @@
 (defun termp (opening tester)
   (char= (enclose opening) tester))
 #+sbcl
-(defun backquote-kludge (str)
-  (remove #\` str))
+(defmacro dostring ((var string &optional result) &body body)
+  (once-only (string)
+    (with-gensyms (count)
+      `(do* ((,count 0 (1+ ,count)))
+	    ((= ,count (length ,string)) ,result)
+	 (let ((,var (elt ,string ,count)))
+	   ,@body)))))
+#+sbcl
+(defclass backquote (t)
+  ((ch :initform nil
+       :accessor ch)
+   (char? :initform nil
+	  :accessor char?)
+   (line? :initform nil
+	  :accessor line?)
+   (pair? :initform nil
+	  :accessor pair?)
+   (acc :initform (make-array 0 :adjustable t :fill-pointer 0)
+	:accessor acc)))
+(labels ((bq (ch)
+	   (if (not (eql (ch ch) #\`))
+	       ch
+	       (progn (setf (char? ch) nil) ch)))
+	 (escape (ch)
+	   ((if (char? ch)
+		(progn (setf (acc ch) (push-on (acc ch) (ch ch))) nil)
+		(if (char= (ch ch) #\\)
+		    (progn (setf (char? ch) t) ch)
+		    ch))))
+	 (line (ch)
+	   (when ch
+	     
+	     (if line?
+		 (when (char= #\Newline ch)
+		   (progn (setf line? nil) nil))
+		 (when (char= #\; ch)
+		   (progn (setf line? t) nil)))))
+	 (pair (ch)
+	   (if (eql ch #\")
+	       (if pair?
+		   (progn (setf pair? (not pair?)) ch)
+		   ch)
+	       ch))))
+(setf (symbol-function 'backquote-remove)
+      (lambda (str)
+	(dostring (ch str (coerce acc 'string))
+		  (let ((res (chain #'bq #'pair #'line #'escape
+				    ch nil nil nil
+				    (make-array 0 :fill-pointer 0 :adjustable t
+						:element-type 'character))))
+		    (when res
+		      (push-on ch acc))))))
 #+sbcl
 (defmacro once-only ((&rest names) &body body)
   "A macro-writing utility for evaluating code only once."
@@ -118,7 +168,7 @@
 #+sbcl
 (defun read-atoms (str)
   (with-macro-fn #\, nil
-    (flatten (read-from-string (backquote-kludge (prepare str)) nil nil))))
+    (flatten (read-from-string (backquote-remove (prepare str)) nil nil))))
 #+sbcl
 (defun read-to-string (stream terminating-char &optional (acc (make-array 0 :adjustable t :fill-pointer 0)))
   (let ((ch (read-char stream nil nil)))

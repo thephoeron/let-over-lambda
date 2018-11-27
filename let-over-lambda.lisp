@@ -264,9 +264,11 @@
     (:dispatch-macro-char #\# #\` #'|#`-reader|)
     (:dispatch-macro-char #\# #\f #'|#f-reader|)
     #+sbcl
-    (:dispatch-macro-char #\# #\g #'(lambda (stream char numarg)
-				      (declare (ignore char numarg))
-				      (make-autogensym-reader 'defmacro stream)))
+    (:dispatch-macro-char
+     #\# #\g
+     #'(lambda (stream char numarg)
+	 (declare (ignore char numarg))
+	 (make-autogensym-reader 'defmacro stream)))
     #+sbcl
     (:dispatch-macro-char #\# #\n #'(lambda (stream char numarg)
 				      (declare (ignore char numarg))
