@@ -97,50 +97,9 @@
 	 (let ((,var (elt ,string ,count)))
 	   ,@body)))))
 #+sbcl
-(defclass backquote (t)
-  ((ch :initform nil
-       :accessor ch)
-   (char? :initform nil
-	  :accessor char?)
-   (line? :initform nil
-	  :accessor line?)
-   (pair? :initform nil
-	  :accessor pair?)
-   (acc :initform (make-array 0 :adjustable t :fill-pointer 0)
-	:accessor acc)))
-(labels ((bq (ch)
-	   (if (not (eql (ch ch) #\`))
-	       ch
-	       (progn (setf (char? ch) nil) ch)))
-	 (escape (ch)
-	   ((if (char? ch)
-		(progn (setf (acc ch) (push-on (acc ch) (ch ch))) nil)
-		(if (char= (ch ch) #\\)
-		    (progn (setf (char? ch) t) ch)
-		    ch))))
-	 (line (ch)
-	   (when ch
-	     
-	     (if line?
-		 (when (char= #\Newline ch)
-		   (progn (setf line? nil) nil))
-		 (when (char= #\; ch)
-		   (progn (setf line? t) nil)))))
-	 (pair (ch)
-	   (if (eql ch #\")
-	       (if pair?
-		   (progn (setf pair? (not pair?)) ch)
-		   ch)
-	       ch))))
-(setf (symbol-function 'backquote-remove)
-      (lambda (str)
-	(dostring (ch str (coerce acc 'string))
-		  (let ((res (chain #'bq #'pair #'line #'escape
-				    ch nil nil nil
-				    (make-array 0 :fill-pointer 0 :adjustable t
-						:element-type 'character))))
-		    (when res
-		      (push-on ch acc))))))
+(defun backquote-remove (str)
+  "TODO: Make this work better!"
+  (remove #\` str))
 #+sbcl
 (defmacro once-only ((&rest names) &body body)
   "A macro-writing utility for evaluating code only once."
