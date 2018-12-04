@@ -37,7 +37,14 @@
 
 (in-package #:let-over-lambda)
 
-
+#+sbcl
+(defmacro once-only ((&rest names) &body body)
+  "A macro-writing utility for evaluating code only once."
+  (let ((gensyms (loop for n in names collect (gensym))))
+    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
+       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+	  ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+	     ,@body)))))
 (defun g!-symbol-p (s)
   (and (symbolp s)
        (> (length (symbol-name s)) 2)
@@ -106,14 +113,6 @@
 (defun backquote-remove (str)
   "TODO: Make this work better!"
   (remove #\` str))
-#+sbcl
-(defmacro once-only ((&rest names) &body body)
-  "A macro-writing utility for evaluating code only once."
-  (let ((gensyms (loop for n in names collect (gensym))))
-    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
-       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
-	  ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
-	     ,@body)))))
 #+sbcl
 (defun push-on (elt stack)
   (vector-push-extend elt stack) stack)
