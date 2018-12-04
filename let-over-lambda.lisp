@@ -184,6 +184,9 @@
           (car ,g!args)
           (format nil "(?~a)~a" ,g!mods (car ,g!args)))
        ,',g!str)))
+#+(and cl-ppcre sbcl)
+(defun format-kludge-match-mode-ppcre-lambda-form ()
+  "(?~a)~a")
 #+(and cl-ppcre (not sbcl))
 (defmacro! subst-mode-ppcre-lambda-form (o!args)
  ``(lambda (,',g!str)
@@ -191,7 +194,7 @@
        ,(car ,g!args)
        ,',g!str
        ,(cadr ,g!args))))
-#+(and cl-ppcre (not sbcl))
+#+cl-ppcre
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun |#~-reader| (stream sub-char numarg)
     (declare (ignore sub-char numarg))
@@ -213,7 +216,6 @@
                           (read-char stream)
                           2)))
         (t (error "Unknown #~~ mode character"))))))
-
 #-sbcl
 (defmacro! dlambda (&rest ds)
   `(lambda (&rest ,g!args)
@@ -228,7 +230,6 @@
                          g!args
                          `(cdr ,g!args)))))
            ds))))
-
 ;; Graham's alambda
 (defmacro alambda (parms &body body)
   `(labels ((self ,parms ,@body))
@@ -277,6 +278,15 @@
     (:dispatch-macro-char #\# #\d #'defmacro!-reader)))
 (in-readtable lol-syntax)
 #+(and cl-ppcre sbcl)
+(progn
+  #d{match-mode-ppcre-lambda-form (o!args o!mods)
+  ``(lambda (,',g!str)
+      (ppcre:scan-to-strings
+       ,(if (zerop (length ,g!mods))
+	    (car ,g!args)
+	    (format nil (format-kludge-match-mode-ppcre-lambda-form) ,g!mods (car ,g!args)))
+       ,',g!str))})
+#+(and cl-ppcre sbcl)
 (defun format-aux (mods carargs)
   (format nil "(?~a)~a" mods carargs))
 #+(and cl-ppcre sbcl)
@@ -287,13 +297,6 @@
 		     (car ,g!args)
 		     (format-aux ,g!mods (car ,g!args)))
 		,',g!str))})
-#+(and cl-ppcre sbcl)
-(progn #d{subst-mode-ppcre-lambda-form (o!args)
-           ``(lambda (,',g!str)
-	       (cl-ppcre:regex-replace-all
-		,(car ,g!args)
-		,',g!str
-		,(cadr ,g!args)))})
 #+sbcl
 (progn #d{dlambda (&rest ds)
            `(lambda (&rest ,g!args)
@@ -593,26 +596,53 @@
 (defun error-aux (a1)
   (error "Too few matchs: ~a unbound." (mkstr "$" a1)))
 #+sbcl
-(progn
-  #d{if-match ((match-regex str) then &optional else)
-  (let* ((dollars (remove-duplicates
-		   (remove-if-not #'dollar-symbol-p
-				  (flatten then))))
-	 (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
-		  0)))
-    `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
-       (declare (ignorable ,g!matches ,g!captures))
-       (let ((,g!captures-len (length ,g!captures)))
-	 (declare (ignorable ,g!captures-len))
-	 (symbol-macrolet ,(mapcar (lambda (a1)
-				     `(,(symb #\$ a1)
-					(if (< ,g!captures-len ,a1)
-					    (error-aux ,a1)
-					    (aref ,g!captures ,(1- a1)))))
-				   (loop for i from 1 to top collect i))
-	   (if ,g!matches
-	       ,then
-	       ,else)))))})
+#d{if-match ((match-regex str) then &optional else)
+(let* ((dollars (remove-duplicates
+		 (remove-if-not #'dollar-symbol-p
+				(flatten then))))
+       (top (or (car (sort (mapcar #'dollar-symbol-p dollars) #'>))
+		0)))
+  `(multiple-value-bind (,g!matches ,g!captures) (,match-regex ,str)
+     (declare (ignorable ,g!matches ,g!captures))
+     (let ((,g!captures-len (length ,g!captures)))
+       (declare (ignorable ,g!captures-len))
+       (symbol-macrolet ,(mapcar (lambda (a1)
+				   `(,(symb #\$ a1)
+				      (if (< ,g!captures-len ,a1)
+					  (error-aux ,a1)
+					  (aref ,g!captures ,(1- a1)))))
+				 (loop for i from 1 to top collect i))
+	 (if ,g!matches
+	     ,then
+	     ,else)))))}
+#+(and cl-ppcre sbcl)
+#d{subst-mode-ppcre-lambda-form(o!args)
+``(lambda (,',g!str)
+    (cl-ppcre:regex-replace-all
+     ,(car ,g!args)
+     ,',g!str
+     ,(cadr ,g!args)))}
+#+sbcl
+#g{dlambda (&rest ds)
+`(lambda (&rest ,g!args)
+   (case (car ,g!args)
+     ,@(mapcar
+	(lambda (d)
+	  `(,(if (eq t (car d))
+		 t
+		 (list (car d)))
+	     (apply (lambda ,@(cdr d))
+		    ,(if (eq t (car d))
+                         g!args
+                         `(cdr ,g!args)))))
+	ds)))}
+#+(and cl-ppcre sbcl)
+(progn #d{subst-mode-ppcre-lambda-form (o!args)
+           ``(lambda (,',g!str)
+	       (cl-ppcre:regex-replace-all
+		,(car ,g!args)
+		,',g!str
+		,(cadr ,g!args)))})
 
 (defmacro when-match ((match-regex str) &body forms)
   `(if-match (,match-regex ,str)

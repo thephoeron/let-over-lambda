@@ -13,10 +13,14 @@
 
 (plan 8)
 
+#-sbcl
 (defun! fn! ()
   `(let ((,g!test 123))
      ,g!test))
-
+#+sbcl
+#n{fn! ()
+  `(let ((,g!test 123))
+     ,g!test)}
 (defmacro fn-macro ()
   (fn!))
 
@@ -31,6 +35,7 @@
   (is (flatten '((A . B) (C D (E) (F (G)))))
       '(A B C D E F G)
       "FLATTEN function works as expected.")
+  #-sbcl
   (is (flatten `(A B C ,flatten-list))
       '(A B C D E F G)
       "FLATTEN on quasiquotes works as expected."))
