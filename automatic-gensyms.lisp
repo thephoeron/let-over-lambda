@@ -89,6 +89,12 @@
 (defun termp (opening tester)
   (char= (enclose opening) tester))
 #+sbcl
+(defmacro with-gensyms (symbols &body body)
+  "Create gensyms for those symbols."
+  `(let (,@(mapcar #'(lambda (sym)
+		       `(,sym ',(gensym))) symbols))
+     ,@body))
+#+sbcl
 (defmacro dostring ((var string &optional result) &body body)
   (once-only (string)
     (with-gensyms (count)
@@ -108,12 +114,6 @@
        `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
 	  ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
 	     ,@body)))))
-#+sbcl
-(defmacro with-gensyms (symbols &body body)
-  "Create gensyms for those symbols."
-  `(let (,@(mapcar #'(lambda (sym)
-		       `(,sym ',(gensym))) symbols))
-     ,@body))
 #+sbcl
 (defun push-on (elt stack)
   (vector-push-extend elt stack) stack)
@@ -135,56 +135,54 @@
 	(read-to-string stream terminating-char (push-on ch acc))
 	(coerce acc 'string))))
 #+sbcl
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun defmacro!-reader (stream char numarg)
-    (declare (ignore char numarg))
-    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	   (code (read-from-string str nil))
-	   (atoms (read-atoms str))
-	   (os (remove-if-not #'o!-symbol-p (remove-duplicates atoms)))	   
-	   (gs (mapcar #'o!-symbol-to-g!-symbol os))
-	   (syms (remove-duplicates (mapcar #'(lambda (x)
-						(intern (remove #\' (remove #\, (symbol-name x)))))
-					    (remove-if-not #'g!-symbol-p atoms))
-				    :test #'(lambda (x y)
-					      (string-equal (symbol-name x)
-							    (symbol-name y))))))
-      (let ((body (cddr code)))
-	(multiple-value-bind (body declarations docstring)
-	    (parse-body body :documentation t)
-	  `(defmacro ,(car code) ,(cadr code)
-	     ,@(when docstring
-		 (list docstring))
-	     ,@declarations
-	     (let ,(mapcar
-		    (lambda (s)
-		      `(,s (gensym ,(subseq
-				     (symbol-name s)
-				     2))))
-		    syms)
-	       `(let ,(mapcar #'list (list ,@gs) (list ,@os))
-		  ,(progn ,@body)))))))))
+(defun defmacro!-reader (stream char numarg)
+  (declare (ignore char numarg))
+  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	 (code (read-from-string str nil))
+	 (atoms (read-atoms str))
+	 (os (remove-if-not #'o!-symbol-p (remove-duplicates atoms)))	   
+	 (gs (mapcar #'o!-symbol-to-g!-symbol os))
+	 (syms (remove-duplicates (mapcar #'(lambda (x)
+					      (intern (remove #\' (remove #\, (symbol-name x)))))
+					  (remove-if-not #'g!-symbol-p atoms))
+				  :test #'(lambda (x y)
+					    (string-equal (symbol-name x)
+							  (symbol-name y))))))
+    (let ((body (cddr code)))
+      (multiple-value-bind (body declarations docstring)
+	  (parse-body body :documentation t)
+	`(defmacro ,(car code) ,(cadr code)
+	   ,@(when docstring
+	       (list docstring))
+	   ,@declarations
+	   (let ,(mapcar
+		  (lambda (s)
+		    `(,s (gensym ,(subseq
+				   (symbol-name s)
+				   2))))
+		  syms)
+	     `(let ,(mapcar #'list (list ,@gs) (list ,@os))
+		,(progn ,@body))))))))
 #+sbcl
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun make-autogensym-reader (form stream)
-    (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
-	   (code (read-from-string str nil))
-	   (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
-					    (remove-if-not #'g!-symbol-p (read-atoms str)))
-				    :test #'(lambda (x y)
-					      (string-equal (symbol-name x)
-							    (symbol-name y))))))
-      (let ((body (cddr code)))
-	(multiple-value-bind (body declarations docstring)
-	    (parse-body body :documentation t)
-	  `(,form ,(car code) ,(cadr code)
-		  ,@(when docstring
-		      (list docstring))
-		  ,@declarations
-		  (let ,(mapcar
-			 (lambda (s)
-			   `(,s (gensym ,(subseq
-					  (symbol-name s)
-					  2))))
-			 syms)
-		    ,@body)))))))
+(defun make-autogensym-reader (form stream)
+  (let* ((str (prepare (read-to-string stream (enclose (read-char stream)))))
+	 (code (read-from-string str nil))
+	 (syms (remove-duplicates (mapcar #'(lambda (x) (intern (remove #\, (symbol-name x))))
+					  (remove-if-not #'g!-symbol-p (read-atoms str)))
+				  :test #'(lambda (x y)
+					    (string-equal (symbol-name x)
+							  (symbol-name y))))))
+    (let ((body (cddr code)))
+      (multiple-value-bind (body declarations docstring)
+	  (parse-body body :documentation t)
+	`(,form ,(car code) ,(cadr code)
+		,@(when docstring
+		    (list docstring))
+		,@declarations
+		(let ,(mapcar
+		       (lambda (s)
+			 `(,s (gensym ,(subseq
+					(symbol-name s)
+					2))))
+		       syms)
+		  ,@body))))))
