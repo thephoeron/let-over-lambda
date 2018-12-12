@@ -1,6 +1,5 @@
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.lisp
 
-;;;; Copyleft Spenser Truex "Equwal" 2018
 ;;;; This file for automatic gensym reader macros on SBCL, since SBCL doesn't support it otherwise.
 
 ;; Antiweb (C) Doug Hoyte
