@@ -26,7 +26,7 @@
 ;; code useful, or would like documentation,
 ;; please consider buying the book!
 
-;; Modifications by "the Phoeron" Colin J.E. Lupton, 2012--2014
+;; Modifications by "the Phoeron" Colin J.E. Lupton, 2012--2023
 ;; - Support for ASDF/Quicklisp
 ;; - Cheap hacks to support new Backquote implementation in SBCL v1.2.2
 
