@@ -1,6 +1,8 @@
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: let-over-lambda.lisp
 
-(in-package #:let-over-lambda)
+(in-package :let-over-lambda)
+
+(named-readtables:in-readtable :fare-quasiquote)
 
 ;; Antiweb (C) Doug Hoyte
 
@@ -283,6 +285,7 @@
      (if it ,then ,else)))
 
 (eval-when (:compile-toplevel :execute :load-toplevel)
+
   (defun |#`-reader| (stream sub-char numarg)
     (declare (ignore sub-char))
     (unless numarg (setq numarg 1))
@@ -299,8 +302,8 @@
     `(declare (optimize (speed ,numarg)
                         (safety ,(- 3 numarg)))))
 
-  (defreadtable lol-syntax
-    (:merge :standard)
+  (named-readtables:defreadtable :lol-syntax
+    (:fuse :standard :fare-quasiquote)
     (:dispatch-macro-char #\# #\" #'|#"-reader|)
     (:dispatch-macro-char #\# #\> #'|#>-reader|)
     #+cl-ppcre
@@ -308,7 +311,7 @@
     (:dispatch-macro-char #\# #\` #'|#`-reader|)
     (:dispatch-macro-char #\# #\f #'|#f-reader|)))
 
-(in-readtable lol-syntax)
+(named-readtables:in-readtable :lol-syntax)
 
 (defmacro! nlet-tail (n letargs &body body)
   (let ((gs (loop for i in letargs

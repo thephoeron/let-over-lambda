@@ -1,8 +1,8 @@
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: LET-OVER-LAMBDA; Base: 10 -*- file: package.lisp
 
-(defpackage #:let-over-lambda
-  (:nicknames #:lol)
-  (:use #:cl #:cl-user #:cl-ppcre)
+(defpackage let-over-lambda
+  (:nicknames lol)
+  (:use cl cl-user cl-ppcre)
   (:import-from #:alexandria
                 #:parse-body)
   (:import-from #:named-readtables
